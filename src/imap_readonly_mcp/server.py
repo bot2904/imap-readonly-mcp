@@ -7,7 +7,7 @@ import base64
 import json
 import os
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any, Literal, cast
@@ -36,6 +36,21 @@ from .utils.email_parser import _html_to_text
 from .utils.identifiers import decode_folder_token
 
 logger = get_logger(__name__)
+
+
+_MISSING = object()
+
+
+def _attachment_metadata_value(metadata: Any, key: str, default: Any = None) -> Any:
+    if isinstance(metadata, Mapping):
+        return metadata.get(key, default)
+    value = getattr(metadata, key, _MISSING)
+    if value is not _MISSING:
+        return value
+    getter = getattr(metadata, "get", None)
+    if callable(getter):
+        return getter(key, default)
+    return default
 
 
 def create_server(settings: MailSettings) -> FastMCP:
@@ -274,26 +289,27 @@ def create_server(settings: MailSettings) -> FastMCP:
             attachments_source = rebuilt
 
         for index, metadata in enumerate(attachments_source):
+            attachment_id_value = _attachment_metadata_value(metadata, "attachment_id")
+            filename = _attachment_metadata_value(metadata, "filename")
+            size = _attachment_metadata_value(metadata, "size")
+            content_type = _attachment_metadata_value(metadata, "content_type")
+            resource_uri = _attachment_metadata_value(metadata, "resource_uri")
             entry = MailAttachment(
-                id=(getattr(metadata, "attachment_id", None) or metadata.get("attachment_id") or str(index)),
-                filename=(getattr(metadata, "filename", None) or metadata.get("filename")),
-                size=(getattr(metadata, "size", None) or metadata.get("size")),
-                mime=(getattr(metadata, "content_type", None) or metadata.get("content_type")),
-                download_url=(getattr(metadata, "resource_uri", None) or metadata.get("resource_uri")),
+                id=attachment_id_value if attachment_id_value is not None else str(index),
+                filename=filename,
+                size=size,
+                mime=content_type,
+                download_url=resource_uri,
             )
             if attachments_mode == "inline":
                 identifier: int | str
-                attachment_id_value = getattr(metadata, "attachment_id", None) or metadata.get(
-                    "attachment_id"
-                )
                 if attachment_id_value is None:
                     identifier = index
                 else:
                     identifier = attachment_id_value
                 if isinstance(identifier, str) and identifier.isdigit():
                     identifier = int(identifier)
-                size_hint = getattr(metadata, "size", None) or metadata.get("size")
-                include_payload = size_hint is None or size_hint <= INLINE_ATTACHMENT_MAX_BYTES
+                include_payload = size is None or size <= INLINE_ATTACHMENT_MAX_BYTES
                 if include_payload:
                     try:
                         content = await _run(
