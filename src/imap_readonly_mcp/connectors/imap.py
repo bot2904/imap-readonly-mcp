@@ -230,7 +230,7 @@ class IMAPReadOnlyConnector(ReadOnlyMailConnector):
         for folder_path in folders:
             if remaining_budget <= 0:
                 break
-            per_folder_limit = min(remaining_budget, limit)
+            per_folder_limit = remaining_budget
             adjusted_filters = filters.model_copy(
                 update={
                     "folder": folder_path,

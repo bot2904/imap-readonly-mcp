@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "patchAttemptId": "pat_fnd-sig-feat-library-df1e19bd2d-_fa2f94c12a",
+  "findingIds": [
+    "fnd_sig-feat-library-df1e19bd2d-2b46_f4f8203950"
+  ],
+  "featureIds": [
+    "feat_library_df1e19bd2d"
+  ],
+  "status": "failed",
+  "plan": "Fixed IMAP all-folder pagination to request offset+limit candidates from each folder and added a focused regression test for nonzero global offsets.",
+  "filesChanged": [
+    "src/imap_readonly_mcp/connectors/imap.py",
+    "tests/test_imap_connector.py"
+  ],
+  "commandsRun": [
+    {
+      "command": "hatch run ruff format --check .",
+      "cwd": "/workspace",
+      "exitCode": 127,
+      "durationMs": 2,
+      "stdout": "",
+      "stderr": "/bin/sh: 1: hatch: not found\n"
+    },
+    {
+      "command": "hatch run mypy .",
+      "cwd": "/workspace",
+      "exitCode": 127,
+      "durationMs": 2,
+      "stdout": "",
+      "stderr": "/bin/sh: 1: hatch: not found\n"
+    },
+    {
+      "command": "hatch run ruff check .",
+      "cwd": "/workspace",
+      "exitCode": 127,
+      "durationMs": 1,
+      "stdout": "",
+      "stderr": "/bin/sh: 1: hatch: not found\n"
+    },
+    {
+      "command": "hatch run pytest",
+      "cwd": "/workspace",
+      "exitCode": 127,
+      "durationMs": 1,
+      "stdout": "",
+      "stderr": "/bin/sh: 1: hatch: not found\n"
+    }
+  ],
+  "testResults": [
+    {
+      "command": "hatch run ruff format --check .",
+      "cwd": "/workspace",
+      "exitCode": 127,
+      "durationMs": 2,
+      "stdout": "",
+      "stderr": "/bin/sh: 1: hatch: not found\n"
+    },
+    {
+      "command": "hatch run mypy .",
+      "cwd": "/workspace",
+      "exitCode": 127,
+      "durationMs": 2,
+      "stdout": "",
+      "stderr": "/bin/sh: 1: hatch: not found\n"
+    },
+    {
+      "command": "hatch run ruff check .",
+      "cwd": "/workspace",
+      "exitCode": 127,
+      "durationMs": 1,
+      "stdout": "",
+      "stderr": "/bin/sh: 1: hatch: not found\n"
+    },
+    {
+      "command": "hatch run pytest",
+      "cwd": "/workspace",
+      "exitCode": 127,
+      "durationMs": 1,
+      "stdout": "",
+      "stderr": "/bin/sh: 1: hatch: not found\n"
+    }
+  ],
+  "provider": {
+    "name": "pi",
+    "model": null,
+    "reasoningEffort": null,
+    "requestId": null,
+    "startedAt": "2026-05-29T00:14:29.494Z",
+    "finishedAt": "2026-05-29T00:16:08.841Z"
+  },
+  "git": {
+    "baseSha": "efcd5ff4038cb94bcb089d734ae569d9a04b2d4f",
+    "commitSha": null,
+    "branchName": "main",
+    "prUrl": null
+  },
+  "createdAt": "2026-05-29T00:14:29.491Z",
+  "updatedAt": "2026-05-29T00:16:08.841Z"
+}

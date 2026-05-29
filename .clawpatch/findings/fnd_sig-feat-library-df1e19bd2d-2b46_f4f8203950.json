@@ -22,11 +22,23 @@
   "whyTestsDoNotAlreadyCoverThis": "No linked tests are included for search_all_folders with nonzero offset.",
   "suggestedRegressionTest": "Mock two selectable folders where the first folder has more than offset + limit messages, call search_all_folders with offset and limit, and assert the returned page contains the expected post-offset messages.",
   "minimumFixScope": "Adjust per-folder limit calculation in IMAPReadOnlyConnector.search_all_folders and cover offset pagination.",
-  "status": "open",
-  "history": [],
+  "status": "fixed",
+  "history": [
+    {
+      "runId": "20260529T001638-e4ed3c",
+      "kind": "revalidate",
+      "status": "fixed",
+      "note": null,
+      "reasoning": "The original evidence path still exists in src/imap_readonly_mcp/connectors/imap.py, and search_all_folders now sets per_folder_limit = remaining_budget rather than capping each folder at limit. This allows a single folder to return offset + limit candidates before the final global offset is applied, addressing the reported drop where offset=10/limit=10 previously fetched only 10 and then discarded them. A regression test exists in tests/test_imap_connector.py asserting offset=10/limit=10 returns messages 11-20 from a folder with enough messages.",
+      "commands": [],
+      "createdAt": "2026-05-29T00:17:10.648Z"
+    }
+  ],
   "signature": "sig_feat-library-df1e19bd2d_2b46522d93",
-  "linkedPatchAttemptIds": [],
+  "linkedPatchAttemptIds": [
+    "pat_fnd-sig-feat-library-df1e19bd2d-_fa2f94c12a"
+  ],
   "createdByRunId": "20260528T233046-ab83d3",
   "createdAt": "2026-05-28T23:31:22.425Z",
-  "updatedAt": "2026-05-28T23:31:22.425Z"
+  "updatedAt": "2026-05-29T00:17:10.648Z"
 }
