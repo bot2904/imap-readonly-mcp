@@ -52,6 +52,46 @@ FASTMCP_STREAMABLE_HTTP__PATH=/mcp \
 imap-readonly-mcp --config config/accounts.yaml --transport streamable-http
 ```
 
+### Pi MCP Adapter Example
+
+With [`pi-mcp-adapter`](https://github.com/nicobailon/pi-mcp-adapter), run this
+server over Streamable HTTP and point Pi at the HTTP endpoint. First install the
+adapter in Pi:
+
+```bash
+pi install npm:pi-mcp-adapter
+```
+
+Start `imap-readonly-mcp` with account settings from environment variables:
+
+```bash
+MAIL_ACCOUNT__PROTOCOL=imap \
+MAIL_ACCOUNT__HOST=imap.example.com \
+MAIL_ACCOUNT__PORT=993 \
+MAIL_ACCOUNT__USERNAME=user@example.com \
+MAIL_ACCOUNT__PASSWORD=change-me \
+MAIL_ACCOUNT__ALLOWED_FOLDERS='["INBOX", "Archive"]' \
+MAIL_CACHE_PATH=/tmp/email_cache.sqlite \
+FASTMCP_TRANSPORT=streamable-http \
+FASTMCP_HOST=127.0.0.1 \
+FASTMCP_PORT=8765 \
+FASTMCP_STREAMABLE_HTTP__PATH=/mcp \
+imap-readonly-mcp --transport streamable-http
+```
+
+Then add the Streamable HTTP MCP endpoint to `.mcp.json` in your Pi project:
+
+```json
+{
+  "mcpServers": {
+    "mail": {
+      "url": "http://127.0.0.1:8765/mcp",
+      "lifecycle": "lazy"
+    }
+  }
+}
+```
+
 ### Verbose Logging
 
 ```bash
