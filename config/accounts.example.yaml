@@ -6,5 +6,7 @@ account:
   port: 993
   username: user@example.com
   password: change-me
-  # cache_path: email_cache.sqlite
-  # fetch_concurrency: 6
+  # allowed_folders: [INBOX, Archive]
+  # excluded_folders: [Spam]
+cache_path: email_cache.sqlite
+fetch_concurrency: 6

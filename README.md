@@ -76,17 +76,53 @@ account:
   port: 993
   username: user@example.com
   password: change-me
-  # cache_path: email_cache.sqlite   # optional SQLite cache location
-  # fetch_concurrency: 6            # max parallel message fetches
+  # allowed_folders: [INBOX, Archive]  # optional folder allow-list
+  # excluded_folders: [Spam]           # optional folder block-list
+cache_path: email_cache.sqlite         # optional SQLite cache location
+fetch_concurrency: 6                   # max parallel message fetches
 ```
 
 ### Environment Variables
+
+Every YAML setting can also be supplied with `MAIL_` environment variables. Nested
+account fields use `__` as the separator. Environment variables and `.env` values
+take precedence over values in the YAML file, and a missing config file is allowed
+when the complete account configuration is provided via the environment.
+
+Example IMAP configuration without `config/accounts.yaml`:
+
+```bash
+export MAIL_ACCOUNT__PROTOCOL=imap
+export MAIL_ACCOUNT__DESCRIPTION="Personal IMAP mailbox"
+export MAIL_ACCOUNT__HOST=imap.example.com
+export MAIL_ACCOUNT__PORT=993
+export MAIL_ACCOUNT__USERNAME=user@example.com
+export MAIL_ACCOUNT__PASSWORD=change-me
+export MAIL_ACCOUNT__ALLOWED_FOLDERS='["INBOX", "Archive"]'
+export MAIL_ACCOUNT__SECURITY__USE_SSL=true
+export MAIL_ACCOUNT__SECURITY__STARTTLS=false
+export MAIL_FETCH_CONCURRENCY=6
+```
+
+For POP3, set `MAIL_ACCOUNT__PROTOCOL=pop3` and the corresponding POP3 host/port.
+For Microsoft Graph, configure nested OAuth fields, for example:
+
+```bash
+export MAIL_ACCOUNT__PROTOCOL=graph
+export MAIL_ACCOUNT__OAUTH__TENANT_ID=your-tenant-id
+export MAIL_ACCOUNT__OAUTH__CLIENT_ID=your-client-id
+export MAIL_ACCOUNT__OAUTH__CLIENT_SECRET=your-client-secret
+export MAIL_ACCOUNT__OAUTH__SCOPES='["https://graph.microsoft.com/.default"]'
+export MAIL_ACCOUNT__OAUTH__GRANT_TYPE=client_credentials
+export MAIL_ACCOUNT__OAUTH__USER_ID=user@example.com
+```
 
 | Variable               | Purpose                                                 |
 |------------------------|---------------------------------------------------------|
 | `MAIL_CONFIG_FILE`     | Override config path (`--config` wins).                 |
 | `MAIL_CACHE_PATH`      | Alternate cache location if not set in YAML.            |
 | `MAIL_FETCH_CONCURRENCY` | Override concurrency (same effect as YAML).          |
+| `MAIL_ACCOUNT__HOST` / `MAIL_ACCOUNT__USERNAME` / etc. | Configure or override account fields. |
 | `FASTMCP_*`            | Standard FastMCP options (transport, ports, auth, logging). |
 
 ---

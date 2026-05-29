@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
-from enum import Enum
+import os
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, Field, SecretStr, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, Field, SecretStr, ValidationError, model_validator
+from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
 
 from .exceptions import ConfigurationError
 
 
-class AccountProtocol(str, Enum):
+class AccountProtocol(StrEnum):
     """Supported email access protocols."""
 
     IMAP = "imap"
@@ -21,7 +22,7 @@ class AccountProtocol(str, Enum):
     GRAPH = "graph"
 
 
-class OAuth2GrantType(str, Enum):
+class OAuth2GrantType(StrEnum):
     """Supported OAuth2 grant types."""
 
     CLIENT_CREDENTIALS = "client_credentials"
@@ -209,21 +210,36 @@ class MailSettings(BaseSettings):
         exclude=True,
     )
 
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        """Prefer environment/.env values over configuration-file values."""
+
+        return env_settings, dotenv_settings, init_settings, file_secret_settings
+
 
 def load_settings(config_path: Path | None = None, overrides: dict[str, Any] | None = None) -> MailSettings:
     """Load configuration from YAML/JSON on disk combined with environment overrides."""
 
     base_data: dict[str, Any] = {}
     resolved_path: Path | None = None
+    missing_config_error: ConfigurationError | None = None
     if config_path:
         resolved_path = Path(config_path).expanduser().resolve()
         if not resolved_path.exists():
-            raise ConfigurationError(f"Configuration file not found: {resolved_path}")
-        try:
-            with resolved_path.open("r", encoding="utf-8") as handle:
-                base_data = yaml.safe_load(handle.read()) or {}
-        except yaml.YAMLError as exc:
-            raise ConfigurationError(f"Unable to parse configuration file {resolved_path}: {exc}") from exc
+            missing_config_error = ConfigurationError(f"Configuration file not found: {resolved_path}")
+        else:
+            try:
+                with resolved_path.open("r", encoding="utf-8") as handle:
+                    base_data = yaml.safe_load(handle.read()) or {}
+            except yaml.YAMLError as exc:
+                raise ConfigurationError(f"Unable to parse configuration file {resolved_path}: {exc}") from exc
     if overrides:
         base_data.update(overrides)
 
@@ -240,10 +256,19 @@ def load_settings(config_path: Path | None = None, overrides: dict[str, Any] | N
                 base_data["account"] = legacy_accounts
             else:
                 raise ConfigurationError("Legacy 'accounts' must be a list or mapping.")
-        else:
-            raise ConfigurationError("Configuration must specify 'account'.")
     base_data.pop("accounts", None)
 
-    settings = MailSettings.model_validate(base_data)
+    try:
+        settings = MailSettings(**base_data)
+    except (ConfigurationError, ValidationError) as exc:
+        if missing_config_error and not _has_account_environment():
+            raise missing_config_error from exc
+        raise ConfigurationError(f"Invalid configuration: {exc}") from exc
     settings.config_path = resolved_path
     return settings
+
+
+def _has_account_environment() -> bool:
+    """Return true if the process environment appears to configure an account."""
+
+    return "MAIL_ACCOUNT" in os.environ or any(key.startswith("MAIL_ACCOUNT__") for key in os.environ)

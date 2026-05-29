@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field, HttpUrl
 
 
-class MailboxRole(str, Enum):
+class MailboxRole(StrEnum):
     """Common mailbox roles."""
 
     INBOX = "inbox"
