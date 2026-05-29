@@ -67,10 +67,10 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/imap-readonly-mcp"
-Repository = "https://github.com/example/imap-readonly-mcp"
-Documentation = "https://github.com/example/imap-readonly-mcp#readme"
-Issues = "https://github.com/example/imap-readonly-mcp/issues"
+Homepage = "https://github.com/AzizMarashly/imap-readonly-mcp"
+Repository = "https://github.com/AzizMarashly/imap-readonly-mcp"
+Documentation = "https://github.com/AzizMarashly/imap-readonly-mcp#readme"
+Issues = "https://github.com/AzizMarashly/imap-readonly-mcp/issues"
 
 [project.scripts]
 imap-readonly-mcp = "imap_readonly_mcp.server:main"
@@ -109,4 +109,3 @@ branch = true
 
 [tool.coverage.report]
 show_missing = true
-
