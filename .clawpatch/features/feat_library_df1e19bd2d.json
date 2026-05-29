@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_library_df1e19bd2d",
+  "title": "Python source src/imap_readonly_mcp/connectors",
+  "summary": "Python source group src/imap_readonly_mcp/connectors with 5 files.",
+  "kind": "library",
+  "source": "python-source-group",
+  "confidence": "medium",
+  "entrypoints": [
+    {
+      "path": "src/imap_readonly_mcp/connectors",
+      "symbol": "src/imap_readonly_mcp/connectors",
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": "src/imap_readonly_mcp/connectors/__init__.py",
+      "reason": "source group src/imap_readonly_mcp/connectors"
+    },
+    {
+      "path": "src/imap_readonly_mcp/connectors/base.py",
+      "reason": "source group src/imap_readonly_mcp/connectors"
+    },
+    {
+      "path": "src/imap_readonly_mcp/connectors/graph.py",
+      "reason": "source group src/imap_readonly_mcp/connectors"
+    },
+    {
+      "path": "src/imap_readonly_mcp/connectors/imap.py",
+      "reason": "source group src/imap_readonly_mcp/connectors"
+    },
+    {
+      "path": "src/imap_readonly_mcp/connectors/pop3.py",
+      "reason": "source group src/imap_readonly_mcp/connectors"
+    }
+  ],
+  "contextFiles": [],
+  "tests": [],
+  "tags": [
+    "python",
+    "source-group"
+  ],
+  "trustBoundaries": [],
+  "status": "needs-fix",
+  "lock": null,
+  "findingIds": [
+    "fnd_sig-feat-library-df1e19bd2d-5dc3_50e2094861",
+    "fnd_sig-feat-library-df1e19bd2d-2b46_f4f8203950",
+    "fnd_sig-feat-library-df1e19bd2d-7655_7d69e82372",
+    "fnd_sig-feat-library-df1e19bd2d-e44d_21a51c21d2"
+  ],
+  "patchAttemptIds": [],
+  "analysisHistory": [
+    {
+      "runId": "20260528T233046-ab83d3",
+      "kind": "review",
+      "summary": "4 finding(s); prompt=54937 bytes; approxTokens=13735; includedFiles=5; omittedFiles=0",
+      "provider": "codex",
+      "model": null,
+      "reasoningEffort": null,
+      "createdAt": "2026-05-28T23:31:22.427Z"
+    }
+  ],
+  "createdAt": "2026-05-28T23:30:24.585Z",
+  "updatedAt": "2026-05-28T23:31:22.427Z"
+}

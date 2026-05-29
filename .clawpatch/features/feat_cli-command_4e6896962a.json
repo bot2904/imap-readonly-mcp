@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_cli-command_4e6896962a",
+  "title": "Python CLI command imap-readonly-mcp",
+  "summary": "Python console script 'imap-readonly-mcp' targets imap_readonly_mcp.server:main, source src/imap_readonly_mcp/server.py.",
+  "kind": "cli-command",
+  "source": "python-console-script",
+  "confidence": "high",
+  "entrypoints": [
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "symbol": "main",
+      "route": null,
+      "command": "imap-readonly-mcp"
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "reason": "console script source"
+    }
+  ],
+  "contextFiles": [],
+  "tests": [],
+  "tags": [
+    "python",
+    "cli"
+  ],
+  "trustBoundaries": [
+    "user-input",
+    "filesystem",
+    "process-exec"
+  ],
+  "status": "needs-fix",
+  "lock": null,
+  "findingIds": [
+    "fnd_sig-feat-cli-command-4e6896962a-_b713e0219f",
+    "fnd_sig-feat-cli-command-4e6896962a-_4bcf7187ad"
+  ],
+  "patchAttemptIds": [],
+  "analysisHistory": [
+    {
+      "runId": "20260528T233046-ab83d3",
+      "kind": "review",
+      "summary": "2 finding(s); prompt=31168 bytes; approxTokens=7792; includedFiles=1; omittedFiles=0",
+      "provider": "codex",
+      "model": null,
+      "reasoningEffort": null,
+      "createdAt": "2026-05-28T23:31:12.534Z"
+    }
+  ],
+  "createdAt": "2026-05-28T23:30:24.585Z",
+  "updatedAt": "2026-05-28T23:31:12.534Z"
+}

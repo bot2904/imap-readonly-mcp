@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-library-df1e19bd2d-5dc3_50e2094861",
+  "featureId": "feat_library_df1e19bd2d",
+  "title": "POP3 applies pagination before filtering",
+  "category": "bug",
+  "severity": "medium",
+  "confidence": "high",
+  "triage": "confirmed-bug",
+  "evidence": [
+    {
+      "path": "src/imap_readonly_mcp/connectors/pop3.py",
+      "startLine": 83,
+      "endLine": 106,
+      "symbol": "POP3ReadOnlyConnector.search_messages",
+      "quote": null
+    }
+  ],
+  "reasoning": "search_messages slices the message index list by offset/limit before retrieving messages and applying sender/recipient/text filters. When the newest messages do not match but later messages do, the method can return fewer than the requested limit or an empty result even though matching messages exist after the initial page.",
+  "reproduction": null,
+  "recommendation": "Apply protocol-side or local filtering before enforcing offset and limit, or continue scanning until enough matching summaries have been collected to satisfy offset + limit.",
+  "whyTestsDoNotAlreadyCoverThis": "No linked tests are included for POP3 filtering combined with pagination.",
+  "suggestedRegressionTest": "Create a fake POP3 connection with three messages where only the oldest matches a text filter, call search_messages with limit=1, and assert the matching oldest message is returned.",
+  "minimumFixScope": "Update POP3ReadOnlyConnector.search_messages pagination flow and add a focused connector test.",
+  "status": "open",
+  "history": [],
+  "signature": "sig_feat-library-df1e19bd2d_5dc3dd5f50",
+  "linkedPatchAttemptIds": [],
+  "createdByRunId": "20260528T233046-ab83d3",
+  "createdAt": "2026-05-28T23:31:22.425Z",
+  "updatedAt": "2026-05-28T23:31:22.425Z"
+}

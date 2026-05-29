@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_library_ee8df81a27",
+  "title": "Python project imap-readonly-mcp",
+  "summary": "Python project metadata in pyproject.toml.",
+  "kind": "library",
+  "source": "python-project",
+  "confidence": "medium",
+  "entrypoints": [
+    {
+      "path": "pyproject.toml",
+      "symbol": "imap-readonly-mcp",
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": "pyproject.toml",
+      "reason": "python project metadata"
+    }
+  ],
+  "contextFiles": [
+    {
+      "path": "README.md",
+      "reason": "python project context"
+    }
+  ],
+  "tests": [],
+  "tags": [
+    "python",
+    "package"
+  ],
+  "trustBoundaries": [],
+  "status": "needs-fix",
+  "lock": null,
+  "findingIds": [
+    "fnd_sig-feat-library-ee8df81a27-e00d_a8f2151790",
+    "fnd_sig-feat-library-ee8df81a27-5288_5fb0b7de4e"
+  ],
+  "patchAttemptIds": [],
+  "analysisHistory": [
+    {
+      "runId": "20260528T233046-ab83d3",
+      "kind": "review",
+      "summary": "2 finding(s); prompt=14661 bytes; approxTokens=3653; includedFiles=2; omittedFiles=0",
+      "provider": "codex",
+      "model": null,
+      "reasoningEffort": null,
+      "createdAt": "2026-05-28T23:31:22.066Z"
+    }
+  ],
+  "createdAt": "2026-05-28T23:30:24.585Z",
+  "updatedAt": "2026-05-28T23:31:22.066Z"
+}

@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "patchAttemptId": "pat_fnd-sig-feat-library-ee8df81a27-_0fdbebf943",
+  "findingIds": [
+    "fnd_sig-feat-library-ee8df81a27-e00d_a8f2151790"
+  ],
+  "featureIds": [
+    "feat_library_ee8df81a27"
+  ],
+  "status": "failed",
+  "plan": "Replaced placeholder project URLs in pyproject.toml with the real upstream GitHub repository URLs and added a focused metadata regression test asserting the package URLs do not point to github.com/example.",
+  "filesChanged": [
+    "pyproject.toml",
+    "tests/test_project_metadata.py"
+  ],
+  "commandsRun": [
+    {
+      "command": "hatch run ruff format --check .",
+      "cwd": "/Users/smore/projects/imap-readonly-mcp",
+      "exitCode": 127,
+      "durationMs": 4,
+      "stdout": "",
+      "stderr": "/bin/sh: hatch: command not found\n"
+    },
+    {
+      "command": "hatch run mypy .",
+      "cwd": "/Users/smore/projects/imap-readonly-mcp",
+      "exitCode": 127,
+      "durationMs": 4,
+      "stdout": "",
+      "stderr": "/bin/sh: hatch: command not found\n"
+    },
+    {
+      "command": "hatch run ruff check .",
+      "cwd": "/Users/smore/projects/imap-readonly-mcp",
+      "exitCode": 127,
+      "durationMs": 3,
+      "stdout": "",
+      "stderr": "/bin/sh: hatch: command not found\n"
+    },
+    {
+      "command": "hatch run pytest",
+      "cwd": "/Users/smore/projects/imap-readonly-mcp",
+      "exitCode": 127,
+      "durationMs": 4,
+      "stdout": "",
+      "stderr": "/bin/sh: hatch: command not found\n"
+    }
+  ],
+  "testResults": [
+    {
+      "command": "hatch run ruff format --check .",
+      "cwd": "/Users/smore/projects/imap-readonly-mcp",
+      "exitCode": 127,
+      "durationMs": 4,
+      "stdout": "",
+      "stderr": "/bin/sh: hatch: command not found\n"
+    },
+    {
+      "command": "hatch run mypy .",
+      "cwd": "/Users/smore/projects/imap-readonly-mcp",
+      "exitCode": 127,
+      "durationMs": 4,
+      "stdout": "",
+      "stderr": "/bin/sh: hatch: command not found\n"
+    },
+    {
+      "command": "hatch run ruff check .",
+      "cwd": "/Users/smore/projects/imap-readonly-mcp",
+      "exitCode": 127,
+      "durationMs": 3,
+      "stdout": "",
+      "stderr": "/bin/sh: hatch: command not found\n"
+    },
+    {
+      "command": "hatch run pytest",
+      "cwd": "/Users/smore/projects/imap-readonly-mcp",
+      "exitCode": 127,
+      "durationMs": 4,
+      "stdout": "",
+      "stderr": "/bin/sh: hatch: command not found\n"
+    }
+  ],
+  "provider": {
+    "name": "codex",
+    "model": null,
+    "reasoningEffort": null,
+    "requestId": null,
+    "startedAt": "2026-05-28T23:46:18.858Z",
+    "finishedAt": "2026-05-28T23:47:21.158Z"
+  },
+  "git": {
+    "baseSha": "1f2300c6a7a1adb494e4b181e77b83b15872ed24",
+    "commitSha": null,
+    "branchName": "main",
+    "prUrl": null
+  },
+  "createdAt": "2026-05-28T23:46:18.856Z",
+  "updatedAt": "2026-05-28T23:47:21.158Z"
+}

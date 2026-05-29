@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "runId": "20260528T233046-ab83d3",
+  "command": "review",
+  "args": [
+    "review",
+    "--limit",
+    "10"
+  ],
+  "rootPath": "/Users/smore/projects/imap-readonly-mcp",
+  "headSha": "c69bf598e81fda089331ddfb3805449465e89602",
+  "startedAt": "2026-05-28T23:30:46.296Z",
+  "finishedAt": "2026-05-28T23:31:44.438Z",
+  "status": "completed",
+  "claimedFeatureIds": [
+    "feat_cli-command_4e6896962a",
+    "feat_library_6e2b79e49b",
+    "feat_library_c7088a8948",
+    "feat_library_df1e19bd2d",
+    "feat_library_ee8df81a27",
+    "feat_test-suite_a6226f638f"
+  ],
+  "findingIds": [
+    "fnd_sig-feat-library-c7088a8948-a3a7_c7b3561e9d",
+    "fnd_sig-feat-cli-command-4e6896962a-_b713e0219f",
+    "fnd_sig-feat-cli-command-4e6896962a-_4bcf7187ad",
+    "fnd_sig-feat-library-ee8df81a27-e00d_a8f2151790",
+    "fnd_sig-feat-library-ee8df81a27-5288_5fb0b7de4e",
+    "fnd_sig-feat-library-df1e19bd2d-5dc3_50e2094861",
+    "fnd_sig-feat-library-df1e19bd2d-2b46_f4f8203950",
+    "fnd_sig-feat-library-df1e19bd2d-7655_7d69e82372",
+    "fnd_sig-feat-library-df1e19bd2d-e44d_21a51c21d2",
+    "fnd_sig-feat-library-6e2b79e49b-4ef9_039e38e2b4",
+    "fnd_sig-feat-library-6e2b79e49b-fac2_ec662857d1",
+    "fnd_sig-feat-library-6e2b79e49b-15df_7c9adc3176"
+  ],
+  "patchAttemptIds": [],
+  "errors": []
+}

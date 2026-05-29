@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-library-6e2b79e49b-4ef9_039e38e2b4",
+  "featureId": "feat_library_6e2b79e49b",
+  "title": "Invalid cursor values can escape the tool-level error handling",
+  "category": "bug",
+  "severity": "medium",
+  "confidence": "high",
+  "triage": "confirmed-bug",
+  "evidence": [
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "startLine": 124,
+      "endLine": 132,
+      "symbol": "_decode_cursor_value",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "startLine": 506,
+      "endLine": 513,
+      "symbol": "mail_fetch",
+      "quote": null
+    }
+  ],
+  "reasoning": "mail_fetch expects cursor decoding failures to be converted into a structured MailFetchResult error, but _decode_cursor_value only catches ValueError, JSONDecodeError, and UnicodeDecodeError. base64 decoding can also raise binascii.Error for malformed padding, and cursor.encode('ascii') can raise UnicodeEncodeError for non-ASCII cursor strings. Those exceptions bypass the ValueError handler in mail_fetch and can fail the whole MCP request instead of returning a normal tool error.",
+  "reproduction": "Call mail_fetch with cursor='abc' to trigger incorrect base64 padding, or with a non-ASCII cursor string to trigger UnicodeEncodeError before the JSON parsing path.",
+  "recommendation": "Catch binascii.Error and UnicodeEncodeError in _decode_cursor_value and re-raise ValueError('Invalid cursor payload') so all malformed cursors follow the existing structured error path.",
+  "whyTestsDoNotAlreadyCoverThis": "No linked tests were included for malformed cursor handling; the shown code only demonstrates the intended ValueError recovery path.",
+  "suggestedRegressionTest": "Add a mail_fetch test that passes cursor='abc' and another non-ASCII cursor, asserting the response contains an errors entry instead of raising.",
+  "minimumFixScope": "Update _decode_cursor_value exception handling and add focused cursor validation tests.",
+  "status": "fixed",
+  "history": [
+    {
+      "runId": null,
+      "kind": "triage",
+      "status": "fixed",
+      "note": null,
+      "reasoning": null,
+      "commands": [],
+      "createdAt": "2026-05-29T00:06:01.055Z"
+    },
+    {
+      "runId": "20260529T000644-d18491",
+      "kind": "revalidate",
+      "status": "fixed",
+      "note": null,
+      "reasoning": "The current /workspace/src/imap_readonly_mcp/server.py still contains the relevant code, but _decode_cursor_value now imports binascii and catches both UnicodeEncodeError and binascii.Error along with the prior JSON/Unicode/value errors, then re-raises ValueError(\"Invalid cursor payload\"). mail_fetch still catches ValueError from _merge_cursor and returns a structured MailFetchResult with an errors entry, so malformed base64 cursors like 'abc' and non-ASCII cursors should no longer escape tool-level error handling.",
+      "commands": [],
+      "createdAt": "2026-05-29T00:07:04.065Z"
+    }
+  ],
+  "signature": "sig_feat-library-6e2b79e49b_4ef9b8e7be",
+  "linkedPatchAttemptIds": [],
+  "createdByRunId": "20260528T233046-ab83d3",
+  "createdAt": "2026-05-28T23:31:44.436Z",
+  "updatedAt": "2026-05-29T00:07:04.065Z"
+}

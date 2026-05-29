@@ -1,0 +1,17 @@
+{
+  "summary": "Caught UnicodeEncodeError and binascii.Error in _decode_cursor_value to ensure all malformed cursor inputs are handled within the structured error path.",
+  "findingIds": [
+    "fnd_sig-feat-cli-command-4e6896962a-_b713e0219f"
+  ],
+  "plannedFiles": [
+    "src/imap_readonly_mcp/server.py"
+  ],
+  "risk": "low",
+  "steps": [
+    "Import binascii in src/imap_readonly_mcp/server.py.",
+    "Update _decode_cursor_value to catch UnicodeEncodeError and binascii.Error, re-raising them as ValueError('Invalid cursor payload')."
+  ],
+  "validationCommands": [
+    "PYTHONPATH=src /usr/local/bin/python3 -c \"import base64, json, binascii; def _decode_cursor_value(cursor: str):\\n    try:\\n        decoded = base64.urlsafe_b64decode(cursor.encode('ascii'))\\n        payload = json.loads(decoded.decode('utf-8'))\\n    except (ValueError, json.JSONDecodeError, UnicodeDecodeError, UnicodeEncodeError, binascii.Error) as exc:\\n        raise ValueError('Invalid cursor payload') from exc\\n    if not isinstance(payload, dict):\\n        raise ValueError('Invalid cursor payload')\\n    return payload\\ntry: _decode_cursor_value('é')\\nexcept ValueError as e: print(f'Caught expected error for non-ASCII: {e}')\\ntry: _decode_cursor_value('abc')\\nexcept ValueError as e: print(f'Caught expected error for malformed base64: {e}')\""
+  ]
+}

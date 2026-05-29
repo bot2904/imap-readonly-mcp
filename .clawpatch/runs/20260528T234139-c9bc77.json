@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "runId": "20260528T234139-c9bc77",
+  "command": "revalidate",
+  "args": [
+    "revalidate",
+    "--finding",
+    "fnd_sig-feat-library-6e2b79e49b-fac2_ec662857d1"
+  ],
+  "rootPath": "/Users/smore/projects/imap-readonly-mcp",
+  "headSha": "c69bf598e81fda089331ddfb3805449465e89602",
+  "startedAt": "2026-05-28T23:41:39.094Z",
+  "finishedAt": "2026-05-28T23:42:53.720Z",
+  "status": "completed",
+  "claimedFeatureIds": [],
+  "findingIds": [
+    "fnd_sig-feat-library-6e2b79e49b-fac2_ec662857d1"
+  ],
+  "patchAttemptIds": [],
+  "errors": []
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-library-ee8df81a27-e00d_a8f2151790",
+  "featureId": "feat_library_ee8df81a27",
+  "title": "Package metadata points users to placeholder repository URLs",
+  "category": "build-release",
+  "severity": "medium",
+  "confidence": "high",
+  "triage": "risk",
+  "evidence": [
+    {
+      "path": "pyproject.toml",
+      "startLine": 69,
+      "endLine": 73,
+      "symbol": null,
+      "quote": null
+    },
+    {
+      "path": "README.md",
+      "startLine": 21,
+      "endLine": 24,
+      "symbol": null,
+      "quote": null
+    }
+  ],
+  "reasoning": "The published package metadata advertises GitHub URLs under github.com/example, while the README points users to an actual ghcr.io/azizmarashly image namespace. If this project is built and published, PyPI and other tooling will direct users to a non-owned placeholder repository for homepage, documentation, source, and issue reporting, which breaks support and provenance expectations for consumers.",
+  "reproduction": null,
+  "recommendation": "Replace the placeholder project URLs with the real repository, documentation, and issue tracker URLs before publishing the package.",
+  "whyTestsDoNotAlreadyCoverThis": "No tests are included for this metadata feature, and normal unit tests would not validate published package URLs unless an explicit metadata check is added.",
+  "suggestedRegressionTest": "Add a packaging metadata test that parses pyproject.toml and asserts project.urls do not contain github.com/example and match the documented project namespace.",
+  "minimumFixScope": "Update the [project.urls] entries in pyproject.toml.",
+  "status": "fixed",
+  "history": [
+    {
+      "runId": "20260528T234832-e2affe",
+      "kind": "revalidate",
+      "status": "fixed",
+      "note": null,
+      "reasoning": "The original evidence paths still exist. pyproject.toml lines 69-73 now set Homepage, Repository, Documentation, and Issues to https://github.com/AzizMarashly/imap-readonly-mcp URLs instead of github.com/example placeholders. README.md lines 21-24 still document the ghcr.io/azizmarashly/imap-readonly-mcp image namespace, which is now consistent with the repository namespace. Current tests include tests/test_project_metadata.py asserting project.urls contains no github.com/example values and exactly matches the AzizMarashly repository URLs. pytest could not be run because pytest is not installed and uv is not available, but a Python tomllib assertion equivalent to the metadata test passed against current pyproject.toml.",
+      "commands": [
+        "nl -ba pyproject.toml | sed -n '1,120p'",
+        "nl -ba README.md | sed -n '1,80p'",
+        "rg -n \"github\\.com/example|ghcr\\.io|project\\.urls|Homepage|Documentation|Repository|Issues|example\" .",
+        "rg --files -g '*test*' -g 'tests/**' -g 'pyproject.toml'",
+        "nl -ba tests/test_project_metadata.py | sed -n '1,80p'",
+        "pytest tests/test_project_metadata.py",
+        "uv run pytest tests/test_project_metadata.py",
+        "python3 -m pytest tests/test_project_metadata.py",
+        "python3 -c \"import tomllib, pathlib; urls=tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['urls']; expected={'Homepage':'https://github.com/AzizMarashly/imap-readonly-mcp','Repository':'https://github.com/AzizMarashly/imap-readonly-mcp','Documentation':'https://github.com/AzizMarashly/imap-readonly-mcp#readme','Issues':'https://github.com/AzizMarashly/imap-readonly-mcp/issues'}; print(urls); assert all('github.com/example' not in url for url in urls.values()); assert urls == expected; print('metadata ok')\""
+      ],
+      "createdAt": "2026-05-28T23:49:15.691Z"
+    }
+  ],
+  "signature": "sig_feat-library-ee8df81a27_e00de02b5c",
+  "linkedPatchAttemptIds": [
+    "pat_fnd-sig-feat-library-ee8df81a27-_0fdbebf943"
+  ],
+  "createdByRunId": "20260528T233046-ab83d3",
+  "createdAt": "2026-05-28T23:31:22.065Z",
+  "updatedAt": "2026-05-28T23:49:15.691Z"
+}

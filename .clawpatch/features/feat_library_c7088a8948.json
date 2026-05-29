@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_library_c7088a8948",
+  "title": "Python source src/imap_readonly_mcp/utils",
+  "summary": "Python source group src/imap_readonly_mcp/utils with 2 files.",
+  "kind": "library",
+  "source": "python-source-group",
+  "confidence": "medium",
+  "entrypoints": [
+    {
+      "path": "src/imap_readonly_mcp/utils",
+      "symbol": "src/imap_readonly_mcp/utils",
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": "src/imap_readonly_mcp/utils/email_parser.py",
+      "reason": "source group src/imap_readonly_mcp/utils"
+    },
+    {
+      "path": "src/imap_readonly_mcp/utils/identifiers.py",
+      "reason": "source group src/imap_readonly_mcp/utils"
+    }
+  ],
+  "contextFiles": [
+    {
+      "path": "tests/test_email_parser.py",
+      "reason": "associated test"
+    },
+    {
+      "path": "tests/test_identifiers.py",
+      "reason": "associated test"
+    }
+  ],
+  "tests": [
+    {
+      "path": "tests/test_email_parser.py",
+      "command": "hatch run pytest"
+    },
+    {
+      "path": "tests/test_identifiers.py",
+      "command": "hatch run pytest"
+    }
+  ],
+  "tags": [
+    "python",
+    "source-group"
+  ],
+  "trustBoundaries": [],
+  "status": "needs-fix",
+  "lock": null,
+  "findingIds": [
+    "fnd_sig-feat-library-c7088a8948-a3a7_c7b3561e9d"
+  ],
+  "patchAttemptIds": [],
+  "analysisHistory": [
+    {
+      "runId": "20260528T233046-ab83d3",
+      "kind": "review",
+      "summary": "1 finding(s); prompt=19871 bytes; approxTokens=4968; includedFiles=4; omittedFiles=0",
+      "provider": "codex",
+      "model": null,
+      "reasoningEffort": null,
+      "createdAt": "2026-05-28T23:31:07.601Z"
+    }
+  ],
+  "createdAt": "2026-05-28T23:30:24.585Z",
+  "updatedAt": "2026-05-28T23:31:07.601Z"
+}

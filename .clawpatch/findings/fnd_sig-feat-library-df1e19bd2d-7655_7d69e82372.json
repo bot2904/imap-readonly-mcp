@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-library-df1e19bd2d-7655_7d69e82372",
+  "featureId": "feat_library_df1e19bd2d",
+  "title": "POP3 uses transient message numbers as stable UIDs",
+  "category": "bug",
+  "severity": "medium",
+  "confidence": "medium",
+  "triage": "risk",
+  "evidence": [
+    {
+      "path": "src/imap_readonly_mcp/connectors/pop3.py",
+      "startLine": 95,
+      "endLine": 101,
+      "symbol": "POP3ReadOnlyConnector.search_messages",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/connectors/pop3.py",
+      "startLine": 108,
+      "endLine": 131,
+      "symbol": "POP3ReadOnlyConnector.fetch_message",
+      "quote": null
+    }
+  ],
+  "reasoning": "Search results expose uid as the POP3 message index, and later fetches convert that uid back to an index for RETR. POP3 message numbers are session-order positions and can change when mailbox contents change, so a search result link can fetch a different message or fail after another client deletes mail. POP3 provides UIDL for stable IDs, but this connector does not use it.",
+  "reproduction": null,
+  "recommendation": "Use POP3 UIDL values as exposed message UIDs, maintain a UIDL-to-index lookup per operation when fetching, and keep the current numeric index only as an internal retrieval detail.",
+  "whyTestsDoNotAlreadyCoverThis": "No linked POP3 tests are included, and the issue requires simulating mailbox renumbering between search and fetch.",
+  "suggestedRegressionTest": "Fake a POP3 server where UIDL values remain stable while message numbers shift between search and fetch, and assert fetch_message retrieves by UIDL rather than by stale index.",
+  "minimumFixScope": "Change POP3 summary UID generation and fetch/raw/attachment lookup to resolve UIDL to the current message number.",
+  "status": "open",
+  "history": [],
+  "signature": "sig_feat-library-df1e19bd2d_765503261a",
+  "linkedPatchAttemptIds": [],
+  "createdByRunId": "20260528T233046-ab83d3",
+  "createdAt": "2026-05-28T23:31:22.425Z",
+  "updatedAt": "2026-05-28T23:31:22.425Z"
+}

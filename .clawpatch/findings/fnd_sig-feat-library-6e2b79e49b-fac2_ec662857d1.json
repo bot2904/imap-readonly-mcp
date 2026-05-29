@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-library-6e2b79e49b-fac2_ec662857d1",
+  "featureId": "feat_library_6e2b79e49b",
+  "title": "Falsy attachment metadata values crash rendering for Pydantic attachments",
+  "category": "bug",
+  "severity": "medium",
+  "confidence": "high",
+  "triage": "confirmed-bug",
+  "evidence": [
+    {
+      "path": "src/imap_readonly_mcp/models.py",
+      "startLine": 46,
+      "endLine": 56,
+      "symbol": "AttachmentMetadata",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/models.py",
+      "startLine": 110,
+      "endLine": 116,
+      "symbol": "MessageDetail",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "startLine": 276,
+      "endLine": 283,
+      "symbol": "_render_attachments",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "startLine": 295,
+      "endLine": 317,
+      "symbol": "_render_attachments",
+      "quote": null
+    }
+  ],
+  "reasoning": "MessageDetail.attachments is modeled as a list of AttachmentMetadata Pydantic models, but _render_attachments mixes attribute access with dict-style metadata.get fallbacks using `or`. Valid falsy values such as size=0, an empty filename, or an empty attachment_id cause the expression to evaluate the `.get(...)` fallback on a Pydantic model, which has no get method. A zero-byte attachment is enough to crash attachment rendering, including the size_hint path used for inline mode.",
+  "reproduction": "Return a MessageDetail whose attachments contain AttachmentMetadata(attachment_id='a', filename='empty.txt', size=0). Calling mail_fetch with include_attachments='meta' or 'inline' reaches _render_attachments and attempts metadata.get('size') on the model.",
+  "recommendation": "Use a small helper that reads from mappings with get and otherwise uses getattr without treating falsy values as missing. Only fall back when the value is actually None or absent.",
+  "whyTestsDoNotAlreadyCoverThis": "No attachment rendering tests were included, and the edge case requires a valid but falsy metadata value such as a zero-byte attachment.",
+  "suggestedRegressionTest": "Add a _render_attachments or mail_fetch regression test with a zero-byte AttachmentMetadata and assert the attachment is returned with size 0 without raising.",
+  "minimumFixScope": "Replace the mixed `getattr(...) or metadata.get(...)` accesses in _render_attachments with type-aware metadata access.",
+  "status": "fixed",
+  "history": [
+    {
+      "runId": "20260528T234139-c9bc77",
+      "kind": "revalidate",
+      "status": "fixed",
+      "note": null,
+      "reasoning": "The original evidence paths still exist: AttachmentMetadata remains at src/imap_readonly_mcp/models.py:46-56, MessageDetail.attachments remains at src/imap_readonly_mcp/models.py:110-116, and _render_attachments remains in src/imap_readonly_mcp/server.py around line 251. The vulnerable mixed access pattern described in the finding is no longer present in _render_attachments; current code reads attachment_id, filename, size, content_type, and resource_uri through _attachment_metadata_value at src/imap_readonly_mcp/server.py:292-296. That helper, defined at src/imap_readonly_mcp/server.py:44-53, uses Mapping.get only for mappings, uses getattr for object/Pydantic metadata, and returns falsy values without falling back. A regression test now exists at tests/test_attachment_rendering.py:5-17 asserting that empty string fields and size=0 are preserved for AttachmentMetadata, plus mapping coverage at lines 20-26. I could not execute pytest in this sandbox because pytest and pydantic are not installed, and the read-only sandbox prevented heredoc execution, but static current-code evidence and the checked-in regression test show the reported crash path has been removed.",
+      "commands": [
+        "nl -ba src/imap_readonly_mcp/models.py | sed -n '35,125p'",
+        "nl -ba src/imap_readonly_mcp/server.py | sed -n '255,330p'",
+        "rg -n \"def _render_attachments|AttachmentMetadata|attachments\" tests src/imap_readonly_mcp",
+        "rg -n \"def _attachment_metadata_value|_attachment_metadata_value\" src/imap_readonly_mcp/server.py",
+        "nl -ba src/imap_readonly_mcp/server.py | sed -n '1,70p'",
+        "nl -ba tests/test_attachment_rendering.py | sed -n '1,200p'",
+        "pytest tests/test_attachment_rendering.py",
+        "pytest tests/test_attachment_serialization.py tests/test_attachment_rendering.py",
+        "sed -n '1,220p' pyproject.toml",
+        "command -v uv || true",
+        "command -v python3 || command -v python || true",
+        "python3 -m pytest tests/test_attachment_rendering.py",
+        "PYTHONPATH=src python3 -c \"from imap_readonly_mcp.models import AttachmentMetadata; from imap_readonly_mcp.server import _attachment_metadata_value; metadata = AttachmentMetadata(attachment_id='', filename='', size=0, resource_uri=''); print(repr(_attachment_metadata_value(metadata, 'attachment_id'))); print(repr(_attachment_metadata_value(metadata, 'filename'))); print(repr(_attachment_metadata_value(metadata, 'size'))); print(repr(_attachment_metadata_value(metadata, 'resource_uri'))); print(repr(_attachment_metadata_value({'attachment_id': '', 'size': 0}, 'size'))); print(repr(_attachment_metadata_value({'attachment_id': '', 'size': 0}, 'missing', 'fallback')))\"",
+        "ls -a",
+        "rg -n \"getattr\\([^\\n]+\\)\\s+or\\s+[^\\n]+\\.get|\\.get\\(\" src/imap_readonly_mcp/server.py tests/test_attachment_rendering.py"
+      ],
+      "createdAt": "2026-05-28T23:42:53.714Z"
+    }
+  ],
+  "signature": "sig_feat-library-6e2b79e49b_fac2b6fdcd",
+  "linkedPatchAttemptIds": [
+    "pat_fnd-sig-feat-library-6e2b79e49b-_f9bd7619d5"
+  ],
+  "createdByRunId": "20260528T233046-ab83d3",
+  "createdAt": "2026-05-28T23:31:44.436Z",
+  "updatedAt": "2026-05-28T23:42:53.714Z"
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-library-df1e19bd2d-2b46_f4f8203950",
+  "featureId": "feat_library_df1e19bd2d",
+  "title": "IMAP all-folder pagination drops results when offset is used",
+  "category": "bug",
+  "severity": "medium",
+  "confidence": "high",
+  "triage": "confirmed-bug",
+  "evidence": [
+    {
+      "path": "src/imap_readonly_mcp/connectors/imap.py",
+      "startLine": 223,
+      "endLine": 264,
+      "symbol": "IMAPReadOnlyConnector.search_all_folders",
+      "quote": null
+    }
+  ],
+  "reasoning": "search_all_folders computes remaining_budget as limit + offset, but each folder query is capped to min(remaining_budget, limit). With offset=10 and limit=10, a folder with many newest messages contributes only 10 summaries, then the final offset removes them all, so messages 11-20 from that folder are never considered. The per-folder cap should allow collecting enough candidates to satisfy the global offset plus limit.",
+  "reproduction": null,
+  "recommendation": "Use remaining_budget, not limit, as the per-folder cap, and consider collecting enough sorted candidates before applying the final global offset.",
+  "whyTestsDoNotAlreadyCoverThis": "No linked tests are included for search_all_folders with nonzero offset.",
+  "suggestedRegressionTest": "Mock two selectable folders where the first folder has more than offset + limit messages, call search_all_folders with offset and limit, and assert the returned page contains the expected post-offset messages.",
+  "minimumFixScope": "Adjust per-folder limit calculation in IMAPReadOnlyConnector.search_all_folders and cover offset pagination.",
+  "status": "open",
+  "history": [],
+  "signature": "sig_feat-library-df1e19bd2d_2b46522d93",
+  "linkedPatchAttemptIds": [],
+  "createdByRunId": "20260528T233046-ab83d3",
+  "createdAt": "2026-05-28T23:31:22.425Z",
+  "updatedAt": "2026-05-28T23:31:22.425Z"
+}

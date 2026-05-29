@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-library-df1e19bd2d-e44d_21a51c21d2",
+  "featureId": "feat_library_df1e19bd2d",
+  "title": "Graph attachment fetch cannot retrieve paged attachments by ID",
+  "category": "bug",
+  "severity": "low",
+  "confidence": "medium",
+  "triage": "risk",
+  "evidence": [
+    {
+      "path": "src/imap_readonly_mcp/connectors/graph.py",
+      "startLine": 132,
+      "endLine": 152,
+      "symbol": "GraphReadOnlyConnector.fetch_message",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/connectors/graph.py",
+      "startLine": 181,
+      "endLine": 199,
+      "symbol": "GraphReadOnlyConnector.fetch_attachment",
+      "quote": null
+    }
+  ],
+  "reasoning": "fetch_message explicitly pages through the attachments endpoint and records attachment IDs, but fetch_attachment first lists /attachments without $top or @odata.nextLink handling and only searches that first response before fetching details. An attachment ID discovered from a later page by fetch_message may be reported in metadata but then be unretrievable through fetch_attachment.",
+  "reproduction": null,
+  "recommendation": "Either fetch the requested attachment directly when attachment_index is an ID, or page through /attachments consistently when resolving an index or ID.",
+  "whyTestsDoNotAlreadyCoverThis": "No linked Graph attachment tests are included, especially not a paginated attachment response.",
+  "suggestedRegressionTest": "Mock Graph attachments with an @odata.nextLink where the requested attachment ID appears on the second page, then assert fetch_attachment returns it.",
+  "minimumFixScope": "Update GraphReadOnlyConnector.fetch_attachment attachment lookup to handle IDs directly or follow pagination.",
+  "status": "open",
+  "history": [],
+  "signature": "sig_feat-library-df1e19bd2d_e44d80322d",
+  "linkedPatchAttemptIds": [],
+  "createdByRunId": "20260528T233046-ab83d3",
+  "createdAt": "2026-05-28T23:31:22.425Z",
+  "updatedAt": "2026-05-28T23:31:22.425Z"
+}

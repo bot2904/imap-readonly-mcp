@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-library-6e2b79e49b-15df_7c9adc3176",
+  "featureId": "feat_library_6e2b79e49b",
+  "title": "Numeric provider attachment IDs are coerced into integer indexes",
+  "category": "api-contract",
+  "severity": "low",
+  "confidence": "medium",
+  "triage": "contract-mismatch",
+  "evidence": [
+    {
+      "path": "src/imap_readonly_mcp/service.py",
+      "startLine": 73,
+      "endLine": 81,
+      "symbol": "fetch_attachment",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "startLine": 284,
+      "endLine": 304,
+      "symbol": "_render_attachments",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/tooling.py",
+      "startLine": 355,
+      "endLine": 361,
+      "symbol": "MailDownloadAttachmentInput",
+      "quote": null
+    }
+  ],
+  "reasoning": "The public attachment input contract says attachment_id may be a provider ID or a numeric index string, and the service connector accepts either int or str. In inline attachment rendering, any string attachment_id made only of digits is converted to int before fetch_attachment. That changes the meaning of legitimate provider IDs like '12345' into positional indexes, which can fetch the wrong attachment or fail even though the provider ID was present in metadata.",
+  "reproduction": "Use a connector that reports an attachment with attachment_id='12345' where the provider expects that string ID. mail_fetch(include_attachments='inline') converts it to integer 12345 before calling service.fetch_attachment.",
+  "recommendation": "Do not coerce provider metadata IDs based solely on string contents. Preserve attachment_id as a string when it came from metadata; reserve integer indexes only for generated fallback identifiers or explicitly indexed user inputs.",
+  "whyTestsDoNotAlreadyCoverThis": "No linked tests were included for numeric-string provider attachment IDs or for distinguishing provider IDs from positional indexes.",
+  "suggestedRegressionTest": "Add a connector stub whose fetch_attachment records the identifier type and assert inline rendering passes '12345' as a string when that is the metadata attachment_id.",
+  "minimumFixScope": "Adjust _render_attachments identifier selection so metadata attachment IDs keep their original type unless the code generated an index fallback.",
+  "status": "open",
+  "history": [],
+  "signature": "sig_feat-library-6e2b79e49b_15df5f8a2f",
+  "linkedPatchAttemptIds": [],
+  "createdByRunId": "20260528T233046-ab83d3",
+  "createdAt": "2026-05-28T23:31:44.436Z",
+  "updatedAt": "2026-05-28T23:31:44.436Z"
+}
