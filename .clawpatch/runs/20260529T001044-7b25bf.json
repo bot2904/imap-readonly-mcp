@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "runId": "20260529T001044-7b25bf",
+  "command": "revalidate",
+  "args": [
+    "revalidate",
+    "--finding",
+    "fnd_sig-feat-library-c7088a8948-a3a7_c7b3561e9d"
+  ],
+  "rootPath": "/workspace",
+  "headSha": "9eec855f265db89cd1b9e69003e4568785a441ec",
+  "startedAt": "2026-05-29T00:10:44.466Z",
+  "finishedAt": "2026-05-29T00:10:57.818Z",
+  "status": "completed",
+  "claimedFeatureIds": [],
+  "findingIds": [
+    "fnd_sig-feat-library-c7088a8948-a3a7_c7b3561e9d"
+  ],
+  "patchAttemptIds": [],
+  "errors": []
+}

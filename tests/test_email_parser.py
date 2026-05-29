@@ -36,3 +36,19 @@ def test_extract_body():
     message = parse_rfc822_message(raw)
     body = extract_body(message)
     assert "test message" in (body.text or "").lower()
+
+
+def test_html_entities_with_angle_brackets_are_preserved_in_text_and_snippet():
+    msg = EmailMessage()
+    msg["From"] = "Alice <alice@example.com>"
+    msg["To"] = "Bob <bob@example.com>"
+    msg["Subject"] = "HTML only"
+    msg.make_alternative()
+    msg.add_alternative("<p>2 &lt; 3 and 4 &gt; 1</p>", subtype="html")
+
+    message = parse_rfc822_message(msg.as_bytes())
+    body = extract_body(message)
+    summary = create_summary_from_message(folder_path="INBOX", uid="123", message=message)
+
+    assert body.text == "2 < 3 and 4 > 1"
+    assert summary.snippet == "2 < 3 and 4 > 1"

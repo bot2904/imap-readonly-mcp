@@ -266,7 +266,6 @@ def _html_to_text(value: str) -> str:
     cleaned = re.sub(r"(?is)<(script|style).*?>.*?</\1>", " ", value)
     cleaned = re.sub(r"(?i)<br\s*/?>", "\n", cleaned)
     cleaned = re.sub(r"(?i)</p\s*>", "\n", cleaned)
-    cleaned = html.unescape(cleaned)
 
     # Drop boundary markers and MIME headers that may still be present.
     lines: list[str] = []
@@ -291,5 +290,6 @@ def _html_to_text(value: str) -> str:
     cleaned = re.sub(r"@media[^{]*\{[^}]*\}", " ", cleaned, flags=re.IGNORECASE | re.DOTALL)
     cleaned = re.sub(r"\.[\w\-]+\s*\{[^}]*\}", " ", cleaned, flags=re.DOTALL)
     cleaned = _strip_html(cleaned)
+    cleaned = html.unescape(cleaned)
     cleaned = re.sub(r"\s+", " ", cleaned)
     return cleaned.strip()
