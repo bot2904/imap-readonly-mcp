@@ -5,7 +5,7 @@
 #   scripts/run-streamable-http.sh [config/accounts.yaml]
 #
 # Optional environment overrides:
-#   HOST=127.0.0.1 PORT=8765 MCP_PATH=/mcp CACHE_PATH=/tmp/email_cache.sqlite
+#   HOST=127.0.0.1 PORT=8765 MCP_PATH=/mcp CACHE_PATH=./email_cache.sqlite
 #   FASTMCP_LOG_LEVEL=DEBUG scripts/run-streamable-http.sh
 
 set -euo pipefail
@@ -23,7 +23,7 @@ Environment overrides:
   HOST=127.0.0.1
   PORT=8765
   MCP_PATH=/mcp
-  CACHE_PATH=/tmp/email_cache.sqlite
+  CACHE_PATH=./email_cache.sqlite
   FASTMCP_LOG_LEVEL=DEBUG
 EOF
   exit 0
@@ -33,7 +33,7 @@ CONFIG_PATH="${1:-${MAIL_CONFIG_FILE:-$PROJECT_ROOT/config/accounts.yaml}}"
 HOST_VALUE="${HOST:-${FASTMCP_HOST:-0.0.0.0}}"
 PORT_VALUE="${PORT:-${FASTMCP_PORT:-8765}}"
 MCP_PATH_VALUE="${MCP_PATH:-${FASTMCP_STREAMABLE_HTTP__PATH:-/mcp}}"
-CACHE_PATH_VALUE="${CACHE_PATH:-${MAIL_CACHE_PATH:-/tmp/email_cache.sqlite}}"
+CACHE_PATH_VALUE="${CACHE_PATH:-${MAIL_CACHE_PATH:-$PROJECT_ROOT/email_cache.sqlite}}"
 
 if [[ ! -f "$CONFIG_PATH" ]]; then
   cat >&2 <<EOF
