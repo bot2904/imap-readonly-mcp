@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import binascii
 import json
 import os
 import re
@@ -140,7 +141,7 @@ def create_server(settings: MailSettings) -> FastMCP:
         try:
             decoded = base64.urlsafe_b64decode(cursor.encode("ascii"))
             payload = json.loads(decoded.decode("utf-8"))
-        except (ValueError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        except (ValueError, json.JSONDecodeError, UnicodeDecodeError, UnicodeEncodeError, binascii.Error) as exc:
             raise ValueError("Invalid cursor payload") from exc
         if not isinstance(payload, dict):
             raise ValueError("Invalid cursor payload")
