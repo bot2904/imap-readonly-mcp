@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import sqlite3
@@ -21,7 +22,9 @@ from .connectors import (
     ReadOnlyMailConnector,
 )
 from .exceptions import (
+    AttachmentNotFoundError,
     ConnectorNotAvailableError,
+    MessageNotFoundError,
 )
 from .models import (
     AttachmentContent,
@@ -33,6 +36,83 @@ from .models import (
 )
 from .utils.identifiers import decode_folder_token
 
+logger = logging.getLogger(__name__)
+
+
+class FolderAccessPolicy:
+    """Central, exact-match folder access policy for a configured account."""
+
+    def __init__(self, settings: MailSettings) -> None:
+        account = settings.account
+        self.protocol = account.protocol
+        self._allowed = _normalize_folder_set(account.allowed_folders)
+        self._excluded = _normalize_folder_set(account.excluded_folders) or frozenset()
+
+    def is_allowed(self, folder_path: str | None) -> bool:
+        """Return whether a folder path may be exposed.
+
+        Matching is exact and case-insensitive.  A configured exclusion always wins over
+        an allow-list match.  POP3 has only one virtual folder, INBOX.
+        """
+
+        if not folder_path:
+            return False
+        normalized = _normalize_folder(folder_path)
+        if self.protocol is AccountProtocol.POP3 and normalized != "inbox":
+            return False
+        if normalized in self._excluded:
+            return False
+        if self._allowed is not None:
+            return normalized in self._allowed
+        return True
+
+    def filter_folders(self, folders: list[FolderInfo]) -> list[FolderInfo]:
+        """Return only folders allowed by the current policy."""
+
+        return [folder for folder in folders if self.is_allowed(folder.path)]
+
+    def log_denied(
+        self,
+        folder_path: str | None,
+        *,
+        operation: str,
+        uid: str | None = None,
+        attachment_id: int | str | None = None,
+        reason: str = "folder denied by policy",
+    ) -> None:
+        logger.info(
+            "Denied mail access: protocol=%s operation=%s folder=%r uid=%r attachment_id=%r reason=%s",
+            self.protocol.value,
+            operation,
+            folder_path,
+            uid,
+            attachment_id,
+            reason,
+        )
+
+    def assert_allowed(
+        self,
+        folder_path: str | None,
+        *,
+        operation: str,
+        uid: str | None = None,
+        attachment_id: int | str | None = None,
+        exc_type: type[Exception] = MessageNotFoundError,
+    ) -> None:
+        """Raise a public not-found style error when a folder is denied."""
+
+        if self.is_allowed(folder_path):
+            return
+        self.log_denied(
+            folder_path,
+            operation=operation,
+            uid=uid,
+            attachment_id=attachment_id,
+        )
+        if exc_type is AttachmentNotFoundError:
+            raise AttachmentNotFoundError("Attachment not found")
+        raise MessageNotFoundError("Message not found")
+
 
 class MailService:
     """High level façade used by the MCP server to service tool/resource requests."""
@@ -41,6 +121,7 @@ class MailService:
         self.settings = settings
         self._connector: ReadOnlyMailConnector | None = None
         self._cache = _MessageCache(settings.cache_path)
+        self._folder_policy = FolderAccessPolicy(settings)
         self._executor = ThreadPoolExecutor(
             max_workers=settings.fetch_concurrency,
             thread_name_prefix="mail-fetch",
@@ -48,26 +129,34 @@ class MailService:
 
     def list_folders(self) -> list[FolderInfo]:
         connector = self._get_connector()
-        return connector.list_folders()
+        return self._folder_policy.filter_folders(connector.list_folders())
 
     def search_messages(self, filters: MessageSearchFilters) -> list[MessageSummary]:
-        connector = self._get_connector()
         normalized_filters = self._normalize_filters(filters)
         if normalized_filters.folder is None:
+            connector = self._get_connector()
             return self._search_all_folders(connector, normalized_filters)
-        return connector.search_messages(normalized_filters)
+        if not self._folder_policy.is_allowed(normalized_filters.folder):
+            self._folder_policy.log_denied(normalized_filters.folder, operation="search_messages")
+            return []
+        connector = self._get_connector()
+        return self._filter_summaries(
+            connector.search_messages(normalized_filters),
+            operation="search_messages_result",
+        )
 
     def fetch_message(self, folder_token: str, uid: str) -> MessageDetail:
-        cached = self._cache.get(folder_token, uid)
+        folder_path = self._decode_and_assert_folder(folder_token, operation="fetch_message", uid=uid)
+        cached = self._get_cached_allowed(folder_token, uid, folder_path)
         if cached:
             return cached
-        detail = self._fetch_message_uncached(folder_token, uid)
+        detail = self._fetch_message_uncached(folder_token, uid, folder_path=folder_path)
         self._cache.set(folder_token, uid, detail)
         return detail
 
     def fetch_raw_message(self, folder_token: str, uid: str) -> bytes:
+        folder_path = self._decode_and_assert_folder(folder_token, operation="fetch_raw_message", uid=uid)
         connector = self._get_connector()
-        folder_path = decode_folder_token(folder_token)
         return connector.fetch_raw_message(folder_path, uid)
 
     def fetch_attachment(
@@ -76,8 +165,14 @@ class MailService:
         uid: str,
         attachment_identifier: int | str,
     ) -> AttachmentContent:
+        folder_path = self._decode_and_assert_folder(
+            folder_token,
+            operation="fetch_attachment",
+            uid=uid,
+            attachment_id=attachment_identifier,
+            exc_type=AttachmentNotFoundError,
+        )
         connector = self._get_connector()
-        folder_path = decode_folder_token(folder_token)
         return connector.fetch_attachment(folder_path, uid, attachment_identifier)
 
     def fetch_details_bulk(self, requests: list[tuple[str, str, str]]) -> dict[str, MessageDetail]:
@@ -86,7 +181,15 @@ class MailService:
         missing: list[tuple[str, str, str]] = []
 
         for resource_uri, folder_token, uid in requests:
-            cached = self._cache.get(folder_token, uid)
+            try:
+                folder_path = self._decode_and_assert_folder(
+                    folder_token,
+                    operation="fetch_details_bulk",
+                    uid=uid,
+                )
+            except MessageNotFoundError:
+                continue
+            cached = self._get_cached_allowed(folder_token, uid, folder_path)
             if cached:
                 results[resource_uri] = cached
             else:
@@ -174,7 +277,14 @@ class MailService:
         filters: MessageSearchFilters,
     ) -> list[MessageSummary]:
         if not connector.capabilities.supports_folders:
-            return connector.search_messages(filters)
+            inbox = "INBOX"
+            if not self._folder_policy.is_allowed(inbox):
+                self._folder_policy.log_denied(inbox, operation="search_all_folders")
+                return []
+            return self._filter_summaries(
+                connector.search_messages(filters.model_copy(update={"folder": inbox})),
+                operation="search_all_folders_result",
+            )
 
         folder_infos = [folder for folder in self.list_folders() if folder.selectable]
         if not folder_infos:
@@ -182,8 +292,11 @@ class MailService:
 
         all_mail_folder = self._find_all_mail_folder(folder_infos)
         if all_mail_folder:
-            return connector.search_messages(
-                filters.model_copy(update={"folder": all_mail_folder, "offset": filters.offset})
+            return self._filter_summaries(
+                connector.search_messages(
+                    filters.model_copy(update={"folder": all_mail_folder, "offset": filters.offset})
+                ),
+                operation="search_all_folders_all_mail_result",
             )
 
         folders = [folder.path for folder in folder_infos]
@@ -209,7 +322,10 @@ class MailService:
                     "limit": per_folder_limit,
                 }
             )
-            folder_summaries = connector.search_messages(adjusted_filters)
+            folder_summaries = self._filter_summaries(
+                connector.search_messages(adjusted_filters),
+                operation="search_all_folders_result",
+            )
             if not folder_summaries:
                 continue
             summaries.extend(folder_summaries)
@@ -272,10 +388,91 @@ class MailService:
         except Exception:
             return None
 
-    def _fetch_message_uncached(self, folder_token: str, uid: str) -> MessageDetail:
+    def _fetch_message_uncached(
+        self,
+        folder_token: str,
+        uid: str,
+        *,
+        folder_path: str | None = None,
+    ) -> MessageDetail:
         connector = self._get_connector()
-        folder_path = decode_folder_token(folder_token)
-        return connector.fetch_message(folder_path, uid)
+        if folder_path is None:
+            folder_path = self._decode_and_assert_folder(folder_token, operation="fetch_message", uid=uid)
+        detail = connector.fetch_message(folder_path, uid)
+        self._validate_detail_for_request(detail, folder_path, operation="fetch_message_result", uid=uid)
+        return detail
+
+    def _decode_and_assert_folder(
+        self,
+        folder_token: str,
+        *,
+        operation: str,
+        uid: str | None = None,
+        attachment_id: int | str | None = None,
+        exc_type: type[Exception] = MessageNotFoundError,
+    ) -> str:
+        try:
+            folder_path = decode_folder_token(folder_token)
+        except Exception as exc:
+            logger.info(
+                "Denied mail access: protocol=%s operation=%s folder_token=%r uid=%r attachment_id=%r reason=invalid folder token",
+                self.settings.account.protocol.value,
+                operation,
+                folder_token,
+                uid,
+                attachment_id,
+            )
+            if exc_type is AttachmentNotFoundError:
+                raise AttachmentNotFoundError("Attachment not found") from exc
+            raise MessageNotFoundError("Message not found") from exc
+        self._folder_policy.assert_allowed(
+            folder_path,
+            operation=operation,
+            uid=uid,
+            attachment_id=attachment_id,
+            exc_type=exc_type,
+        )
+        if self.settings.account.protocol is AccountProtocol.POP3:
+            return "INBOX"
+        return folder_path
+
+    def _get_cached_allowed(self, folder_token: str, uid: str, folder_path: str) -> MessageDetail | None:
+        cached = self._cache.get(folder_token, uid)
+        if cached is None:
+            return None
+        try:
+            self._validate_detail_for_request(cached, folder_path, operation="cache_get", uid=uid)
+        except MessageNotFoundError:
+            self._cache.delete(folder_token, uid)
+            return None
+        return cached
+
+    def _validate_detail_for_request(
+        self,
+        detail: MessageDetail,
+        folder_path: str,
+        *,
+        operation: str,
+        uid: str,
+    ) -> None:
+        if detail.folder_path != folder_path:
+            self._folder_policy.log_denied(
+                detail.folder_path,
+                operation=operation,
+                uid=uid,
+                reason=f"folder mismatch for requested folder {folder_path!r}",
+            )
+            raise MessageNotFoundError("Message not found")
+        self._folder_policy.assert_allowed(detail.folder_path, operation=operation, uid=uid)
+
+    def _filter_summaries(self, summaries: list[MessageSummary], *, operation: str) -> list[MessageSummary]:
+        allowed: list[MessageSummary] = []
+        for summary in summaries:
+            if self._folder_policy.is_allowed(summary.folder_path):
+                allowed.append(summary)
+            else:
+                self._folder_policy.log_denied(summary.folder_path, operation=operation, uid=summary.uid)
+        return allowed
 
 
 class _MessageCache:
@@ -336,6 +533,23 @@ class _MessageCache:
                 """,
                 (folder_token, uid, payload.encode("utf-8")),
             )
+
+    def delete(self, folder_token: str, uid: str) -> None:
+        with self._lock, self._connect() as con:
+            con.execute(
+                "delete from messages where folder_token=? and uid=?",
+                (folder_token, uid),
+            )
+
+
+def _normalize_folder(value: str) -> str:
+    return value.casefold()
+
+
+def _normalize_folder_set(values: list[str] | None) -> frozenset[str] | None:
+    if values is None:
+        return None
+    return frozenset(_normalize_folder(value) for value in values)
 
 
 def _ensure_datetime(value: datetime | str | None) -> datetime | None:

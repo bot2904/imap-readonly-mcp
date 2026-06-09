@@ -108,6 +108,7 @@ class GraphReadOnlyConnector(ReadOnlyMailConnector):
                     "receivedDateTime",
                     "sentDateTime",
                     "hasAttachments",
+                    "parentFolderId",
                     "internetMessageHeaders",
                     "isRead",
                     "isDraft",
@@ -122,6 +123,7 @@ class GraphReadOnlyConnector(ReadOnlyMailConnector):
             raise MessageNotFoundError(f"Message {uid} not found in Graph mailbox")
         response.raise_for_status()
         payload = response.json()
+        self._assert_payload_in_folder(payload, folder_path, uid)
         summary = self._convert_message_summary(payload, payload.get("parentFolderId"))
         body = MessageBody(
             text=(payload.get("body") or {}).get("content"),
@@ -171,6 +173,7 @@ class GraphReadOnlyConnector(ReadOnlyMailConnector):
         return detail
 
     def fetch_raw_message(self, folder_path: str, uid: str) -> bytes:
+        self._assert_message_in_folder(folder_path, uid)
         url = f"{GRAPH_API_ROOT}/{self._resource_path}/messages/{uid}/$value"
         response = self._session.get(url, headers=self._headers(), stream=True)
         if response.status_code == 404:
@@ -179,6 +182,7 @@ class GraphReadOnlyConnector(ReadOnlyMailConnector):
         return response.content
 
     def fetch_attachment(self, folder_path: str, uid: str, attachment_index: int | str) -> AttachmentContent:
+        self._assert_message_in_folder(folder_path, uid)
         url = f"{GRAPH_API_ROOT}/{self._resource_path}/messages/{uid}/attachments"
         response = self._session.get(url, headers=self._headers())
         response.raise_for_status()
@@ -295,6 +299,19 @@ class GraphReadOnlyConnector(ReadOnlyMailConnector):
             raw_resource_uri=f"mail+raw://{folder_token}/{message_id}",
         )
         return summary
+
+    def _assert_message_in_folder(self, folder_path: str, uid: str) -> None:
+        url = f"{GRAPH_API_ROOT}/{self._resource_path}/messages/{uid}"
+        response = self._session.get(url, headers=self._headers(), params={"$select": "id,parentFolderId"})
+        if response.status_code == 404:
+            raise MessageNotFoundError(f"Message {uid} not found in Graph mailbox")
+        response.raise_for_status()
+        self._assert_payload_in_folder(response.json(), folder_path, uid)
+
+    def _assert_payload_in_folder(self, payload: dict[str, Any], folder_path: str, uid: str) -> None:
+        parent_folder_id = payload.get("parentFolderId")
+        if parent_folder_id != folder_path:
+            raise MessageNotFoundError(f"Message {uid} not found in requested Graph folder")
 
 
 def _build_resource_path(config: MailAccountConfig) -> str:

@@ -6,6 +6,8 @@ account:
   port: 993
   username: user@example.com
   password: change-me
+  # Exact, case-insensitive folder policy; excluded_folders overrides allowed_folders.
+  # For Graph, use opaque folder IDs from mail://folders rather than display names.
   # allowed_folders: [INBOX, Archive]
   # excluded_folders: [Spam]
 cache_path: email_cache.sqlite

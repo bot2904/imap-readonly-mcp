@@ -20,6 +20,7 @@ def test_load_settings_from_environment_without_config_file(monkeypatch: pytest.
     monkeypatch.setenv("MAIL_ACCOUNT__USERNAME", "user@example.com")
     monkeypatch.setenv("MAIL_ACCOUNT__PASSWORD", "app-password")
     monkeypatch.setenv("MAIL_ACCOUNT__ALLOWED_FOLDERS", '["INBOX", "Archive"]')
+    monkeypatch.setenv("MAIL_ACCOUNT__EXCLUDED_FOLDERS", '["Spam"]')
     monkeypatch.setenv("MAIL_FETCH_CONCURRENCY", "8")
 
     settings = load_settings(Path("/tmp/does-not-exist-mail-config.yaml"))
@@ -31,6 +32,7 @@ def test_load_settings_from_environment_without_config_file(monkeypatch: pytest.
     assert settings.account.password is not None
     assert settings.account.password.get_secret_value() == "app-password"
     assert settings.account.allowed_folders == ["INBOX", "Archive"]
+    assert settings.account.excluded_folders == ["Spam"]
     assert settings.fetch_concurrency == 8
 
 

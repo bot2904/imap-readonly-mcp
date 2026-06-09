@@ -116,11 +116,26 @@ account:
   port: 993
   username: user@example.com
   password: change-me
-  # allowed_folders: [INBOX, Archive]  # optional folder allow-list
-  # excluded_folders: [Spam]           # optional folder block-list
+  # allowed_folders: [INBOX, Archive]  # optional exact, case-insensitive folder allow-list
+  # excluded_folders: [Spam]           # optional exact, case-insensitive deny-list; overrides allowed_folders
 cache_path: email_cache.sqlite         # optional SQLite cache location
 fetch_concurrency: 6                   # max parallel message fetches
 ```
+
+Folder filtering is enforced in the service layer for folder listings, search, direct
+message/resource reads, raw message access, attachments, and cached messages. When
+`allowed_folders` is set, only exact folder names/identifiers in that list are
+accessible; subfolders are not implicitly included. When `allowed_folders` is unset,
+all folders are accessible except entries in `excluded_folders`. Matching is
+case-insensitive and `excluded_folders` always wins. An empty `allowed_folders: []`
+list allows no folders. Denied folders or messages are returned to clients as
+missing/not found and are only logged internally.
+
+For Microsoft Graph accounts, folder filters match Graph folder IDs exactly (the
+opaque `FolderInfo.path` / folder token value), not display names. Use `mail://folders`
+to enumerate the Graph folder IDs to place in `allowed_folders` or `excluded_folders`.
+POP3 exposes only the virtual `INBOX` folder, so non-`INBOX` folder tokens are treated
+as missing.
 
 ### Environment Variables
 
