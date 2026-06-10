@@ -87,11 +87,8 @@ class POP3ReadOnlyConnector(ReadOnlyMailConnector):
         with self._connection() as conn:
             stat = conn.stat()
             message_count = stat[0]
-            indices = list(range(message_count, 0, -1))
-            if offset:
-                indices = indices[offset:]
-            if limit is not None:
-                indices = indices[:limit]
+            indices = range(message_count, 0, -1)
+            
             for index in indices:
                 raw = self._retrieve_message(conn, index)
                 message = parse_rfc822_message(raw)
@@ -102,8 +99,14 @@ class POP3ReadOnlyConnector(ReadOnlyMailConnector):
                 )
                 if not _matches_filters(summary, filters):
                     continue
+                
                 summaries.append(summary)
-        return summaries
+                if len(summaries) >= offset + limit:
+                    break
+        
+        if offset:
+            summaries = summaries[offset:]
+        return summaries[:limit]
 
     def fetch_message(self, folder_path: str, uid: str) -> MessageDetail:
         with self._connection() as conn:
