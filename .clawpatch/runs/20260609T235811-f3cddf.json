@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "runId": "20260609T235811-f3cddf",
+  "command": "review",
+  "args": [
+    "review"
+  ],
+  "rootPath": "/workspace",
+  "headSha": "fe5277ee180d6050509791937ffb5272d7e600cc",
+  "startedAt": "2026-06-09T23:58:11.963Z",
+  "finishedAt": "2026-06-09T23:59:08.991Z",
+  "status": "completed",
+  "claimedFeatureIds": [
+    "feat_config_19c6c52003"
+  ],
+  "findingIds": [
+    "fnd_sig-feat-config-19c6c52003-41f2e_a705de7120",
+    "fnd_sig-feat-config-19c6c52003-4eb12_d9b49af6a4"
+  ],
+  "patchAttemptIds": [],
+  "errors": []
+}

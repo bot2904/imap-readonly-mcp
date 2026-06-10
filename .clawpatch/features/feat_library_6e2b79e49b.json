@@ -44,8 +44,22 @@
       "reason": "source group src/imap_readonly_mcp"
     }
   ],
-  "contextFiles": [],
-  "tests": [],
+  "contextFiles": [
+    {
+      "path": "pyproject.toml",
+      "reason": "python target runtime metadata"
+    },
+    {
+      "path": "tests/test_config.py",
+      "reason": "associated test"
+    }
+  ],
+  "tests": [
+    {
+      "path": "tests/test_config.py",
+      "command": "uv run pytest"
+    }
+  ],
   "tags": [
     "python",
     "source-group"
@@ -71,5 +85,5 @@
     }
   ],
   "createdAt": "2026-05-28T23:30:24.585Z",
-  "updatedAt": "2026-05-28T23:31:44.438Z"
+  "updatedAt": "2026-06-09T23:58:01.792Z"
 }

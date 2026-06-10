@@ -16,7 +16,15 @@
   ],
   "ownedFiles": [
     {
+      "path": "tests/test_attachment_rendering.py",
+      "reason": "pytest file"
+    },
+    {
       "path": "tests/test_attachment_serialization.py",
+      "reason": "pytest file"
+    },
+    {
+      "path": "tests/test_config.py",
       "reason": "pytest file"
     },
     {
@@ -24,13 +32,41 @@
       "reason": "pytest file"
     },
     {
+      "path": "tests/test_folder_policy.py",
+      "reason": "pytest file"
+    },
+    {
+      "path": "tests/test_graph_connector.py",
+      "reason": "pytest file"
+    },
+    {
       "path": "tests/test_identifiers.py",
+      "reason": "pytest file"
+    },
+    {
+      "path": "tests/test_imap_connector.py",
+      "reason": "pytest file"
+    },
+    {
+      "path": "tests/test_project_metadata.py",
       "reason": "pytest file"
     }
   ],
   "contextFiles": [
     {
+      "path": "pyproject.toml",
+      "reason": "python target runtime metadata"
+    },
+    {
+      "path": "tests/test_attachment_rendering.py",
+      "reason": "nearby test"
+    },
+    {
       "path": "tests/test_attachment_serialization.py",
+      "reason": "nearby test"
+    },
+    {
+      "path": "tests/test_config.py",
       "reason": "nearby test"
     },
     {
@@ -38,22 +74,62 @@
       "reason": "nearby test"
     },
     {
+      "path": "tests/test_folder_policy.py",
+      "reason": "nearby test"
+    },
+    {
+      "path": "tests/test_graph_connector.py",
+      "reason": "nearby test"
+    },
+    {
       "path": "tests/test_identifiers.py",
+      "reason": "nearby test"
+    },
+    {
+      "path": "tests/test_imap_connector.py",
+      "reason": "nearby test"
+    },
+    {
+      "path": "tests/test_project_metadata.py",
       "reason": "nearby test"
     }
   ],
   "tests": [
     {
+      "path": "tests/test_attachment_rendering.py",
+      "command": "uv run pytest"
+    },
+    {
       "path": "tests/test_attachment_serialization.py",
-      "command": "hatch run pytest"
+      "command": "uv run pytest"
+    },
+    {
+      "path": "tests/test_config.py",
+      "command": "uv run pytest"
     },
     {
       "path": "tests/test_email_parser.py",
-      "command": "hatch run pytest"
+      "command": "uv run pytest"
+    },
+    {
+      "path": "tests/test_folder_policy.py",
+      "command": "uv run pytest"
+    },
+    {
+      "path": "tests/test_graph_connector.py",
+      "command": "uv run pytest"
     },
     {
       "path": "tests/test_identifiers.py",
-      "command": "hatch run pytest"
+      "command": "uv run pytest"
+    },
+    {
+      "path": "tests/test_imap_connector.py",
+      "command": "uv run pytest"
+    },
+    {
+      "path": "tests/test_project_metadata.py",
+      "command": "uv run pytest"
     }
   ],
   "tags": [
@@ -61,7 +137,7 @@
     "test"
   ],
   "trustBoundaries": [],
-  "status": "reviewed",
+  "status": "pending",
   "lock": null,
   "findingIds": [],
   "patchAttemptIds": [],
@@ -77,5 +153,5 @@
     }
   ],
   "createdAt": "2026-05-28T23:30:24.585Z",
-  "updatedAt": "2026-05-28T23:31:18.297Z"
+  "updatedAt": "2026-06-09T23:58:01.792Z"
 }

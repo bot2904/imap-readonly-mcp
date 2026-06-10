@@ -20,7 +20,12 @@
       "reason": "console script source"
     }
   ],
-  "contextFiles": [],
+  "contextFiles": [
+    {
+      "path": "pyproject.toml",
+      "reason": "python target runtime metadata"
+    }
+  ],
   "tests": [],
   "tags": [
     "python",
@@ -50,5 +55,5 @@
     }
   ],
   "createdAt": "2026-05-28T23:30:24.585Z",
-  "updatedAt": "2026-05-28T23:31:12.534Z"
+  "updatedAt": "2026-06-09T23:58:01.792Z"
 }

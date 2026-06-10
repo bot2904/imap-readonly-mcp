@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-config-19c6c52003-4eb12_d9b49af6a4",
+  "featureId": "feat_config_19c6c52003",
+  "title": "Potential for incorrect PROJECT_ROOT if command substitutions fail",
+  "category": "maintainability",
+  "severity": "low",
+  "confidence": "medium",
+  "triage": "risk",
+  "evidence": [
+    {
+      "path": "scripts/run-streamable-http.sh",
+      "startLine": 20,
+      "endLine": 21,
+      "symbol": null,
+      "quote": null
+    }
+  ],
+  "reasoning": "The script uses command substitutions to determine SCRIPT_DIR and PROJECT_ROOT. Under 'set -e', if a command inside a substitution fails (like 'cd' to a non-existent or restricted directory), the shell script does not immediately exit unless 'shopt -s inherit_errexit' is set (which is not standard in many Bash versions or this script). Instead, the variable is assigned an empty string. This can lead to PROJECT_ROOT being incorrectly resolved to the filesystem root ('/'), causing subsequent checks and 'exec' attempts to look in incorrect locations.",
+  "reproduction": "This is difficult to trigger without environmental issues (e.g., executing the script from a context where its own directory is unreadable), but would result in PROJECT_ROOT being assigned '/' if the first 'cd' fails.",
+  "recommendation": "Use separate commands to change directories and capture 'pwd', or set 'shopt -s inherit_errexit' if the environment allows Bash 4.4+. Alternatively, verify that SCRIPT_DIR is non-empty after assignment.",
+  "whyTestsDoNotAlreadyCoverThis": "No tests are provided for the wrapper scripts.",
+  "suggestedRegressionTest": null,
+  "minimumFixScope": "Add a check to ensure SCRIPT_DIR and PROJECT_ROOT are not empty after assignment.",
+  "status": "open",
+  "history": [],
+  "signature": "sig_feat-config-19c6c52003_4eb12f79e2",
+  "linkedPatchAttemptIds": [],
+  "createdByRunId": "20260609T235811-f3cddf",
+  "createdAt": "2026-06-09T23:59:08.987Z",
+  "updatedAt": "2026-06-09T23:59:08.987Z"
+}

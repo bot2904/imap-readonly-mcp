@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_config_19c6c52003",
+  "title": "Shell/workflow config run-streamable-http.sh",
+  "summary": "Shell or workflow automation in scripts/run-streamable-http.sh, including command substitutions and machine-readable command output.",
+  "kind": "config",
+  "source": "shell-workflow-heuristic",
+  "confidence": "medium",
+  "entrypoints": [
+    {
+      "path": "scripts/run-streamable-http.sh",
+      "symbol": null,
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": "scripts/run-streamable-http.sh",
+      "reason": "entrypoint"
+    }
+  ],
+  "contextFiles": [],
+  "tests": [],
+  "tags": [
+    "config",
+    "shell",
+    "workflow"
+  ],
+  "trustBoundaries": [
+    "process-exec",
+    "filesystem",
+    "network"
+  ],
+  "status": "needs-fix",
+  "lock": null,
+  "findingIds": [
+    "fnd_sig-feat-config-19c6c52003-41f2e_a705de7120",
+    "fnd_sig-feat-config-19c6c52003-4eb12_d9b49af6a4"
+  ],
+  "patchAttemptIds": [],
+  "analysisHistory": [
+    {
+      "runId": "20260609T235811-f3cddf",
+      "kind": "review",
+      "summary": "2 finding(s); prompt=9302 bytes; approxTokens=2326; includedFiles=1; omittedFiles=0",
+      "provider": "pi",
+      "model": null,
+      "reasoningEffort": null,
+      "createdAt": "2026-06-09T23:59:08.989Z"
+    }
+  ],
+  "createdAt": "2026-06-09T23:58:01.792Z",
+  "updatedAt": "2026-06-09T23:59:08.989Z"
+}
