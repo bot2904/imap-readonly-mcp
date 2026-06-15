@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "findingId": "fnd_sig-feat-cli-command-4e6896962a-_0b9a3d01db",
+  "featureId": "feat_cli-command_4e6896962a",
+  "title": "mail_fetch ids parameter is required despite being documented as optional",
+  "category": "api-contract",
+  "severity": "medium",
+  "confidence": "medium",
+  "triage": "contract-mismatch",
+  "evidence": [
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "startLine": 443,
+      "endLine": 450,
+      "symbol": "mail_fetch",
+      "quote": null
+    },
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "startLine": 510,
+      "endLine": 522,
+      "symbol": "mail_fetch",
+      "quote": null
+    }
+  ],
+  "reasoning": "The `ids` parameter has no Python default value, while its Field metadata uses `default_factory=list` and the tool description says callers can leave it empty. If FastMCP invokes the function without supplying `ids`, Python treats it as a required argument and can raise a missing-argument error before the normalization at lines 510-522 can run. The neighboring parameters all have explicit defaults, making this likely accidental.",
+  "reproduction": null,
+  "recommendation": "Give `ids` an explicit function default, e.g. `ids: Annotated[list[str], Field(...)] = []` or preferably `ids: Annotated[list[str] | None, Field(default=None, ...)] = None`, then normalize to an empty list/None internally.",
+  "whyTestsDoNotAlreadyCoverThis": "No tests are included for this feature, and the excerpt does not show a tool-schema or direct invocation test that omits `ids`.",
+  "suggestedRegressionTest": "Add a test that invokes `mail_fetch` through the MCP/FastMCP interface with only default arguments or only `query`, asserting it does not fail due to a missing `ids` argument.",
+  "minimumFixScope": "Update the `mail_fetch` function signature and any corresponding input normalization/types.",
+  "status": "open",
+  "history": [],
+  "signature": "sig_feat-cli-command-4e6896962a_46ed6e8323",
+  "linkedPatchAttemptIds": [],
+  "createdByRunId": "20260615T204520-96f4ce",
+  "createdAt": "2026-06-15T20:45:42.753Z",
+  "updatedAt": "2026-06-15T20:45:42.753Z"
+}

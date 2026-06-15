@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_library_f73556c98a",
+  "title": "C/C++ source group .uv-cache/archive-v0/ouxWFPH596lvbHcD",
+  "summary": "C/C++/CUDA source files under .uv-cache/archive-v0/ouxWFPH596lvbHcD not owned by a build target.",
+  "kind": "library",
+  "source": "c-cpp-group",
+  "confidence": "low",
+  "entrypoints": [
+    {
+      "path": ".uv-cache/archive-v0/ouxWFPH596lvbHcD/cffi/_cffi_errors.h",
+      "symbol": ".uv-cache/archive-v0/ouxWFPH596lvbHcD",
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": ".uv-cache/archive-v0/ouxWFPH596lvbHcD/cffi/_cffi_errors.h",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/ouxWFPH596lvbHcD/cffi/_cffi_include.h",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/ouxWFPH596lvbHcD/cffi/_embedding.h",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/ouxWFPH596lvbHcD/cffi/parse_c_type.h",
+      "reason": "source group member"
+    }
+  ],
+  "contextFiles": [],
+  "tests": [],
+  "tags": [
+    "c",
+    "source-group"
+  ],
+  "trustBoundaries": [
+    "filesystem"
+  ],
+  "status": "pending",
+  "lock": null,
+  "findingIds": [],
+  "patchAttemptIds": [],
+  "analysisHistory": [],
+  "createdAt": "2026-06-15T20:44:55.765Z",
+  "updatedAt": "2026-06-15T20:44:55.765Z"
+}

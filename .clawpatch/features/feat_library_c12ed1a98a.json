@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_library_c12ed1a98a",
+  "title": "C/C++ source group .uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/:vec",
+  "summary": "C/C++/CUDA source files under .uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/:vec not owned by a build target.",
+  "kind": "library",
+  "source": "c-cpp-group",
+  "confidence": "low",
+  "entrypoints": [
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_bool.c",
+      "symbol": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/:vec",
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_bool.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_float.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_i16.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_i32.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_i64.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_nested.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_t.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_template.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/vecs/vec_u8.c",
+      "reason": "source group member"
+    }
+  ],
+  "contextFiles": [],
+  "tests": [],
+  "tags": [
+    "c",
+    "source-group"
+  ],
+  "trustBoundaries": [
+    "filesystem"
+  ],
+  "status": "pending",
+  "lock": null,
+  "findingIds": [],
+  "patchAttemptIds": [],
+  "analysisHistory": [],
+  "createdAt": "2026-06-15T20:44:55.765Z",
+  "updatedAt": "2026-06-15T20:44:55.765Z"
+}

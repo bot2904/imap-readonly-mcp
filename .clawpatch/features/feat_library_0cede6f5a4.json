@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_library_0cede6f5a4",
+  "title": "C/C++ source group .uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic",
+  "summary": "C/C++/CUDA source files under .uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic not owned by a build target.",
+  "kind": "library",
+  "source": "c-cpp-group",
+  "confidence": "low",
+  "entrypoints": [
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/32/dec_loop.c",
+      "symbol": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic",
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/32/dec_loop.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/32/enc_loop.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/64/enc_loop.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/codec.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/dec_head.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/dec_tail.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/enc_head.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/generic/enc_tail.c",
+      "reason": "source group member"
+    }
+  ],
+  "contextFiles": [],
+  "tests": [],
+  "tags": [
+    "c",
+    "source-group"
+  ],
+  "trustBoundaries": [
+    "filesystem"
+  ],
+  "status": "pending",
+  "lock": null,
+  "findingIds": [],
+  "patchAttemptIds": [],
+  "analysisHistory": [],
+  "createdAt": "2026-06-15T20:44:55.765Z",
+  "updatedAt": "2026-06-15T20:44:55.765Z"
+}

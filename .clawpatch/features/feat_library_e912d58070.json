@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_library_e912d58070",
+  "title": "C/C++ source group .uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/sse41",
+  "summary": "C/C++/CUDA source files under .uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/sse41 not owned by a build target.",
+  "kind": "library",
+  "source": "c-cpp-group",
+  "confidence": "low",
+  "entrypoints": [
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/sse41/codec.c",
+      "symbol": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/sse41",
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/base64/arch/sse41/codec.c",
+      "reason": "source group member"
+    }
+  ],
+  "contextFiles": [],
+  "tests": [],
+  "tags": [
+    "c",
+    "source-group"
+  ],
+  "trustBoundaries": [
+    "filesystem"
+  ],
+  "status": "pending",
+  "lock": null,
+  "findingIds": [],
+  "patchAttemptIds": [],
+  "analysisHistory": [],
+  "createdAt": "2026-06-15T20:44:55.765Z",
+  "updatedAt": "2026-06-15T20:44:55.765Z"
+}

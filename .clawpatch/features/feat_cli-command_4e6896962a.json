@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_cli-command_4e6896962a",
+  "title": "Python CLI command imap-readonly-mcp",
+  "summary": "Python console script 'imap-readonly-mcp' targets imap_readonly_mcp.server:main, source src/imap_readonly_mcp/server.py.",
+  "kind": "cli-command",
+  "source": "python-console-script",
+  "confidence": "high",
+  "entrypoints": [
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "symbol": "main",
+      "route": null,
+      "command": "imap-readonly-mcp"
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": "src/imap_readonly_mcp/server.py",
+      "reason": "console script source"
+    }
+  ],
+  "contextFiles": [
+    {
+      "path": "pyproject.toml",
+      "reason": "python target runtime metadata"
+    }
+  ],
+  "tests": [],
+  "tags": [
+    "python",
+    "cli"
+  ],
+  "trustBoundaries": [
+    "user-input",
+    "filesystem",
+    "process-exec"
+  ],
+  "status": "needs-fix",
+  "lock": null,
+  "findingIds": [
+    "fnd_sig-feat-cli-command-4e6896962a-_0b9a3d01db"
+  ],
+  "patchAttemptIds": [],
+  "analysisHistory": [
+    {
+      "runId": "20260615T204505-ee1e88",
+      "kind": "review-error",
+      "summary": "pi provider failed: spawn pi ENOENT",
+      "provider": "pi",
+      "model": null,
+      "reasoningEffort": null,
+      "createdAt": "2026-06-15T20:45:05.191Z"
+    },
+    {
+      "runId": "20260615T204520-96f4ce",
+      "kind": "review",
+      "summary": "1 finding(s); prompt=35608 bytes; approxTokens=8902; includedFiles=2; omittedFiles=0",
+      "provider": "pi",
+      "model": null,
+      "reasoningEffort": null,
+      "createdAt": "2026-06-15T20:45:42.754Z"
+    }
+  ],
+  "createdAt": "2026-06-15T20:44:55.765Z",
+  "updatedAt": "2026-06-15T20:45:42.754Z"
+}

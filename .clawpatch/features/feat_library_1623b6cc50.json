@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "featureId": "feat_library_1623b6cc50",
+  "title": "C/C++ source group .uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt#1",
+  "summary": "C/C++/CUDA source files under .uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt#1 not owned by a build target.",
+  "kind": "library",
+  "source": "c-cpp-group",
+  "confidence": "low",
+  "entrypoints": [
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/CPy.h",
+      "symbol": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt#1",
+      "route": null,
+      "command": null
+    }
+  ],
+  "ownedFiles": [
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/CPy.h",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/dict_ops.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/exc_ops.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/float_ops.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/function_wrapper.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/generic_ops.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/getargs.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/getargsfast.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/init.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/int_ops.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/list_ops.c",
+      "reason": "source group member"
+    },
+    {
+      "path": ".uv-cache/archive-v0/Nok0P-h-q6LE5GmD/mypyc/lib-rt/misc_ops.c",
+      "reason": "source group member"
+    }
+  ],
+  "contextFiles": [],
+  "tests": [],
+  "tags": [
+    "c",
+    "source-group"
+  ],
+  "trustBoundaries": [
+    "filesystem"
+  ],
+  "status": "pending",
+  "lock": null,
+  "findingIds": [],
+  "patchAttemptIds": [],
+  "analysisHistory": [],
+  "createdAt": "2026-06-15T20:44:55.765Z",
+  "updatedAt": "2026-06-15T20:44:55.765Z"
+}

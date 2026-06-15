@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "runId": "20260615T204520-96f4ce",
+  "command": "review",
+  "args": [
+    "review"
+  ],
+  "rootPath": "/workspace",
+  "headSha": "c8e715c95884e063888aeeb44620b85fe6576be3",
+  "startedAt": "2026-06-15T20:45:20.811Z",
+  "finishedAt": "2026-06-15T20:45:42.756Z",
+  "status": "completed",
+  "claimedFeatureIds": [
+    "feat_cli-command_4e6896962a"
+  ],
+  "findingIds": [
+    "fnd_sig-feat-cli-command-4e6896962a-_0b9a3d01db"
+  ],
+  "patchAttemptIds": [],
+  "errors": []
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "runId": "20260615T204505-ee1e88",
+  "command": "review",
+  "args": [
+    "review"
+  ],
+  "rootPath": "/Users/smore/projects/imap-readonly-mcp",
+  "headSha": "c8e715c95884e063888aeeb44620b85fe6576be3",
+  "startedAt": "2026-06-15T20:45:05.183Z",
+  "finishedAt": "2026-06-15T20:45:05.191Z",
+  "status": "failed",
+  "claimedFeatureIds": [
+    "feat_cli-command_4e6896962a"
+  ],
+  "findingIds": [],
+  "patchAttemptIds": [],
+  "errors": [
+    {
+      "message": "pi provider failed: spawn pi ENOENT",
+      "code": "provider-failure"
+    }
+  ]
+}
