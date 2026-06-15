@@ -61,7 +61,7 @@ class MailFetchInput(BaseModel):
         description="If provided, fetch exactly these message identifiers (use the `id` field from prior calls).",
     )
     query: str | None = _nullable_string_field(
-        description="Free-text or provider-specific mail query. Leave empty to list the most recent messages.",
+        description="Free-text IMAP mail query. Leave empty to list the most recent messages.",
         examples=["from:billing@example.com newer_than:7d"],
     )
     folder: str | None = _nullable_string_field(
@@ -95,7 +95,7 @@ class MailFetchInput(BaseModel):
     )
     expand_thread: bool = Field(
         default=False,
-        description="When true, include other messages from matching threads (best effort per provider).",
+        description="When true, include other messages from matching threads when available.",
     )
     include_attachments: Literal["none", "meta", "inline"] = Field(
         default="meta",
@@ -152,7 +152,7 @@ class MailAttachment(BaseModel):
     mime: str | None = Field(default=None, description="MIME/content type.")
     download_url: str | None = Field(
         default=None,
-        description="Direct download URL when supplied by the provider.",
+        description="Direct download URL when available.",
     )
     data_base64: str | None = Field(
         default=None,
@@ -236,7 +236,7 @@ class MailMessageItem(BaseModel):
     snippet: str | None = Field(default=None, description="Short preview of the body content.")
     has_attachments: bool | None = Field(
         default=None,
-        description="True when the message has at least one attachment (as reported by the provider).",
+        description="True when the message has at least one attachment.",
     )
     body_text: str | None = Field(default=None, description="Plain text body (when include='full').")
     body_html: str | None = Field(default=None, description="HTML body (when include='full').")
@@ -246,7 +246,7 @@ class MailMessageItem(BaseModel):
     )
     flags: dict[str, Any] | None = Field(
         default=None,
-        description="Raw flag state from the provider (seen, flagged, etc.).",
+        description="Raw IMAP flag state (seen, flagged, etc.).",
     )
     attachments: list[MailAttachment] = Field(
         default_factory=list, description="Attachment metadata/payload entries."
@@ -357,7 +357,7 @@ class MailDownloadAttachmentInput(BaseModel):
         examples=["mail://SU5CT1g=/12345"],
     )
     attachment_id: str = Field(
-        description="Attachment identifier. Pass provider ID or a numeric index as a string (e.g., '0').",
+        description="Attachment identifier. Pass a numeric index as a string (e.g., '0').",
         examples=["att-001", "0"],
     )
 

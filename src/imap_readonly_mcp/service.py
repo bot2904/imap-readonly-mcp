@@ -15,12 +15,7 @@ from pathlib import Path
 from dateparser import parse as parse_datetime
 
 from .config import AccountProtocol, MailSettings
-from .connectors import (
-    GraphReadOnlyConnector,
-    IMAPReadOnlyConnector,
-    POP3ReadOnlyConnector,
-    ReadOnlyMailConnector,
-)
+from .connectors import IMAPReadOnlyConnector, ReadOnlyMailConnector
 from .exceptions import (
     AttachmentNotFoundError,
     ConnectorNotAvailableError,
@@ -52,14 +47,12 @@ class FolderAccessPolicy:
         """Return whether a folder path may be exposed.
 
         Matching is exact and case-insensitive.  A configured exclusion always wins over
-        an allow-list match.  POP3 has only one virtual folder, INBOX.
+        an allow-list match.
         """
 
         if not folder_path:
             return False
         normalized = _normalize_folder(folder_path)
-        if self.protocol is AccountProtocol.POP3 and normalized != "inbox":
-            return False
         if normalized in self._excluded:
             return False
         if self._allowed is not None:
@@ -216,15 +209,9 @@ class MailService:
         if self._connector:
             return self._connector
         account = self.settings.account
-        connector_cls_map: dict[AccountProtocol, type[ReadOnlyMailConnector]] = {
-            AccountProtocol.IMAP: IMAPReadOnlyConnector,
-            AccountProtocol.POP3: POP3ReadOnlyConnector,
-            AccountProtocol.GRAPH: GraphReadOnlyConnector,
-        }
-        connector_cls = connector_cls_map.get(account.protocol)
-        if not connector_cls:
+        if account.protocol is not AccountProtocol.IMAP:
             raise ConnectorNotAvailableError(f"No connector registered for protocol {account.protocol.value}")
-        connector = connector_cls(account)
+        connector = IMAPReadOnlyConnector(account)
         self._connector = connector
         return connector
 
@@ -432,8 +419,6 @@ class MailService:
             attachment_id=attachment_id,
             exc_type=exc_type,
         )
-        if self.settings.account.protocol is AccountProtocol.POP3:
-            return "INBOX"
         return folder_path
 
     def _get_cached_allowed(self, folder_token: str, uid: str, folder_path: str) -> MessageDetail | None:

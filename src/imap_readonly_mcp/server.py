@@ -428,7 +428,7 @@ def create_server(settings: MailSettings) -> FastMCP:
             "List, search, or read messages from the mailbox with controllable body detail and attachment metadata.\n"
             "Parameters:\n"
             "- `ids`: array of message ids to fetch directly (skips search/paging).\n"
-            "- `query`: free-text/provider query (e.g. `from:billing@example.com newer_than:7d`).\n"
+            "- `query`: free-text IMAP query (e.g. `from:billing@example.com newer_than:7d`).\n"
             "- `folder`: human name or encoded token; omit to search all folders via heuristics.\n"
             '- `since`/`until`: ISO or natural-language bounds ("2025-05-01", "last monday").\n'
             "- `limit`: page size (defaults to server limit, typically 50).\n"
@@ -452,7 +452,7 @@ def create_server(settings: MailSettings) -> FastMCP:
             str,
             Field(
                 default="",
-                description="Free-text/provider query (empty for latest messages).",
+                description="Free-text IMAP query (empty for latest messages).",
             ),
         ] = "",
         folder: Annotated[
@@ -721,14 +721,14 @@ def create_server(settings: MailSettings) -> FastMCP:
             "Download a single attachment for a message, returning metadata plus Base64 content.\n"
             "Parameters:\n"
             "- `message_id`: value from the `id` field in mail_fetch results (mail://token/uid).\n"
-            "- `attachment_id`: provider id or integer index from `attachments` (0-based for IMAP/POP3)."
+            "- `attachment_id`: integer index from `attachments` (0-based)."
         ),
         structured_output=True,
     )
     async def mail_download_attachment(
         message_id: Annotated[str, Field(description="Message identifier from mail_fetch (`id` field).")],
         attachment_id: Annotated[
-            str, Field(description="Attachment identifier (provider id or numeric index as a string).")
+            str, Field(description="Attachment identifier as a numeric index string.")
         ],
     ) -> MailDownloadAttachmentResult:
         payload = MailDownloadAttachmentInput(message_id=message_id, attachment_id=attachment_id)

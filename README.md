@@ -1,7 +1,7 @@
 # IMAP Read-Only MCP Server
 
 Expose a single mailbox to Model Context Protocol (MCP) agents without risking mutations.  
-This server works with IMAP, POP3, and Microsoft Graph mailboxes and focuses on:
+This server works with IMAP mailboxes and focuses on:
 
 - **Immutable access** – every operation uses `SELECT ... READONLY`, no flags are touched.
 - **LLM-friendly payloads** – plain-text snippets, curated metadata, and configurable body detail.
@@ -110,7 +110,7 @@ Full example (`config/accounts.example.yaml`):
 ```yaml
 # Example configuration file for the read-only mail MCP server.
 account:
-  protocol: imap             # or pop3 / graph
+  protocol: imap
   description: "Personal IMAP mailbox"
   host: imap.example.com
   port: 993
@@ -130,12 +130,6 @@ all folders are accessible except entries in `excluded_folders`. Matching is
 case-insensitive and `excluded_folders` always wins. An empty `allowed_folders: []`
 list allows no folders. Denied folders or messages are returned to clients as
 missing/not found and are only logged internally.
-
-For Microsoft Graph accounts, folder filters match Graph folder IDs exactly (the
-opaque `FolderInfo.path` / folder token value), not display names. Use `mail://folders`
-to enumerate the Graph folder IDs to place in `allowed_folders` or `excluded_folders`.
-POP3 exposes only the virtual `INBOX` folder, so non-`INBOX` folder tokens are treated
-as missing.
 
 ### Environment Variables
 
@@ -157,19 +151,6 @@ export MAIL_ACCOUNT__ALLOWED_FOLDERS='["INBOX", "Archive"]'
 export MAIL_ACCOUNT__SECURITY__USE_SSL=true
 export MAIL_ACCOUNT__SECURITY__STARTTLS=false
 export MAIL_FETCH_CONCURRENCY=6
-```
-
-For POP3, set `MAIL_ACCOUNT__PROTOCOL=pop3` and the corresponding POP3 host/port.
-For Microsoft Graph, configure nested OAuth fields, for example:
-
-```bash
-export MAIL_ACCOUNT__PROTOCOL=graph
-export MAIL_ACCOUNT__OAUTH__TENANT_ID=your-tenant-id
-export MAIL_ACCOUNT__OAUTH__CLIENT_ID=your-client-id
-export MAIL_ACCOUNT__OAUTH__CLIENT_SECRET=your-client-secret
-export MAIL_ACCOUNT__OAUTH__SCOPES='["https://graph.microsoft.com/.default"]'
-export MAIL_ACCOUNT__OAUTH__GRANT_TYPE=client_credentials
-export MAIL_ACCOUNT__OAUTH__USER_ID=user@example.com
 ```
 
 | Variable               | Purpose                                                 |
@@ -225,9 +206,9 @@ All structured fields are curated for LLM prompts:
 | URI Template                         | MIME Type           | Notes                                       |
 |--------------------------------------|---------------------|---------------------------------------------|
 | `mail://{folder_token}/{uid}`        | `text/plain`        | Plain text (converted from HTML when needed). |
-| `mail+html://{folder_token}/{uid}`   | `text/html`         | Raw HTML body (if supplied by the provider). |
+| `mail+html://{folder_token}/{uid}`   | `text/html`         | Raw HTML body (if present). |
 | `mail+raw://{folder_token}/{uid}`    | `message/rfc822`    | RFC822 source for ingestion/pipeline jobs.  |
-| `mail+attachment://{folder_token}/{uid}/{attachment_identifier}` | `application/octet-stream` | Attachment bytes (index or provider id). |
+| `mail+attachment://{folder_token}/{uid}/{attachment_identifier}` | `application/octet-stream` | Attachment bytes by numeric index. |
 | `mail://folders`                     | `application/json`  | Enumerates available folders/tokens.        |
 
 ---
@@ -245,11 +226,11 @@ Key directories:
 ```
 src/imap_readonly_mcp/
   ├── config.py          # settings & loader
-  ├── connectors/        # IMAP / POP3 / Graph implementations
+  ├── connectors/        # IMAP connector implementation
   ├── service.py         # caching, parallel fetch orchestration
   ├── server.py          # FastMCP entrypoint & tool wiring
   ├── tooling.py         # Pydantic models for tool IO
   └── utils/             # parsers, identifier helpers, etc.
 ```
 
-Feel free to open issues or PRs for additional connectors, caching strategies, or tooling improvements.
+Feel free to open issues or PRs for caching strategies or tooling improvements.

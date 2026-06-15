@@ -24,7 +24,7 @@ class MailboxRole(StrEnum):
 class FolderInfo(BaseModel):
     """Metadata describing an accessible folder/mailbox."""
 
-    path: str = Field(description="IMAP style folder path or POP3 virtual identifier.")
+    path: str = Field(description="IMAP folder path.")
     encoded_path: str = Field(
         description="URL-safe encoded folder identifier used in resource URIs. Consumers should treat as opaque."
     )
@@ -162,5 +162,5 @@ class AttachmentContent(BaseModel):
     mime_type: str = Field(description="Attachment MIME type.")
     file_name: str = Field(description="Attachment file name.")
     download_url: HttpUrl | None = Field(
-        default=None, description="If available, direct download link produced by the provider."
+        default=None, description="Reserved for connectors that can expose direct download links."
     )

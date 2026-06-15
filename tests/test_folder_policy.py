@@ -25,12 +25,11 @@ from imap_readonly_mcp.utils.identifiers import encode_folder_path
 
 def _account(
     *,
-    protocol: AccountProtocol = AccountProtocol.IMAP,
     allowed_folders: list[str] | None = None,
     excluded_folders: list[str] | None = None,
 ) -> MailAccountConfig:
     return MailAccountConfig(
-        protocol=protocol,
+        protocol=AccountProtocol.IMAP,
         host="mail.example.com",
         username="user@example.com",
         password="password",
@@ -42,13 +41,11 @@ def _account(
 def _settings(
     tmp_path: Path,
     *,
-    protocol: AccountProtocol = AccountProtocol.IMAP,
     allowed_folders: list[str] | None = None,
     excluded_folders: list[str] | None = None,
 ) -> MailSettings:
     return MailSettings(
         account=_account(
-            protocol=protocol,
             allowed_folders=allowed_folders,
             excluded_folders=excluded_folders,
         ),
@@ -227,24 +224,3 @@ def test_bulk_fetch_denied_folder_does_not_return_cached_detail(tmp_path: Path) 
 
     assert results == {}
     assert connector.fetch_calls == []
-
-
-def test_pop3_only_allows_inbox_virtual_folder_and_respects_exclusion(tmp_path: Path) -> None:
-    settings = _settings(tmp_path, protocol=AccountProtocol.POP3)
-    connector = FakeConnector(settings.account, supports_folders=False)
-    service = _service(settings, connector)
-
-    assert service.search_messages(MessageSearchFilters(limit=10))
-    assert connector.search_calls == ["INBOX"]
-
-    assert service.fetch_message(encode_folder_path("inbox"), "1").folder_path == "INBOX"
-
-    with pytest.raises(MessageNotFoundError):
-        service.fetch_message(encode_folder_path("Archive"), "1")
-
-    excluded_settings = _settings(tmp_path / "excluded", protocol=AccountProtocol.POP3, excluded_folders=["inbox"])
-    excluded_connector = FakeConnector(excluded_settings.account, supports_folders=False)
-    excluded_service = _service(excluded_settings, excluded_connector)
-
-    assert excluded_service.search_messages(MessageSearchFilters(limit=10)) == []
-    assert excluded_connector.search_calls == []
