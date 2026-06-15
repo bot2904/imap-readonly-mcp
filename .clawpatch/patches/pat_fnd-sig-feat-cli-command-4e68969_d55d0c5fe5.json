@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "patchAttemptId": "pat_fnd-sig-feat-cli-command-4e68969_d55d0c5fe5",
+  "findingIds": [
+    "fnd_sig-feat-cli-command-4e6896962a-_0b9a3d01db"
+  ],
+  "featureIds": [
+    "feat_cli-command_4e6896962a"
+  ],
+  "status": "failed",
+  "plan": "Fix mail_fetch 'ids' parameter to be optional by adding a default value of [] in the function signature.",
+  "filesChanged": [
+    "src/imap_readonly_mcp/server.py"
+  ],
+  "commandsRun": [
+    {
+      "command": "uv run ruff format --check .",
+      "cwd": "/workspace",
+      "exitCode": 2,
+      "durationMs": 7,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/home/pi/.cache/uv`\n  Caused by: failed to create directory `/home/pi/.cache/uv`: Permission denied (os error 13)\n"
+    },
+    {
+      "command": "uv run mypy .",
+      "cwd": "/workspace",
+      "exitCode": 2,
+      "durationMs": 8,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/home/pi/.cache/uv`\n  Caused by: failed to create directory `/home/pi/.cache/uv`: Permission denied (os error 13)\n"
+    },
+    {
+      "command": "uv run ruff check .",
+      "cwd": "/workspace",
+      "exitCode": 2,
+      "durationMs": 6,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/home/pi/.cache/uv`\n  Caused by: failed to create directory `/home/pi/.cache/uv`: Permission denied (os error 13)\n"
+    },
+    {
+      "command": "uv run pytest",
+      "cwd": "/workspace",
+      "exitCode": 2,
+      "durationMs": 7,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/home/pi/.cache/uv`\n  Caused by: failed to create directory `/home/pi/.cache/uv`: Permission denied (os error 13)\n"
+    }
+  ],
+  "testResults": [
+    {
+      "command": "uv run ruff format --check .",
+      "cwd": "/workspace",
+      "exitCode": 2,
+      "durationMs": 7,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/home/pi/.cache/uv`\n  Caused by: failed to create directory `/home/pi/.cache/uv`: Permission denied (os error 13)\n"
+    },
+    {
+      "command": "uv run mypy .",
+      "cwd": "/workspace",
+      "exitCode": 2,
+      "durationMs": 8,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/home/pi/.cache/uv`\n  Caused by: failed to create directory `/home/pi/.cache/uv`: Permission denied (os error 13)\n"
+    },
+    {
+      "command": "uv run ruff check .",
+      "cwd": "/workspace",
+      "exitCode": 2,
+      "durationMs": 6,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/home/pi/.cache/uv`\n  Caused by: failed to create directory `/home/pi/.cache/uv`: Permission denied (os error 13)\n"
+    },
+    {
+      "command": "uv run pytest",
+      "cwd": "/workspace",
+      "exitCode": 2,
+      "durationMs": 7,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/home/pi/.cache/uv`\n  Caused by: failed to create directory `/home/pi/.cache/uv`: Permission denied (os error 13)\n"
+    }
+  ],
+  "provider": {
+    "name": "pi",
+    "model": null,
+    "reasoningEffort": null,
+    "requestId": null,
+    "startedAt": "2026-06-15T20:46:46.726Z",
+    "finishedAt": "2026-06-15T20:47:26.090Z"
+  },
+  "git": {
+    "baseSha": "bbf5f2dfb04b29b31878706aace7937cdbaa06e4",
+    "commitSha": null,
+    "branchName": "main",
+    "prUrl": null
+  },
+  "createdAt": "2026-06-15T20:46:46.724Z",
+  "updatedAt": "2026-06-15T20:47:26.090Z"
+}

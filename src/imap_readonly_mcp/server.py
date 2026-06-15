@@ -444,10 +444,9 @@ def create_server(settings: MailSettings) -> FastMCP:
         ids: Annotated[
             list[str],
             Field(
-                default_factory=list,
                 description="Exact message ids to fetch (leave empty to search).",
             ),
-        ],
+        ] = [],
         query: Annotated[
             str,
             Field(
