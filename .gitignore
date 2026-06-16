@@ -15,6 +15,9 @@ coverage.xml
 .idea/
 .vscode/
 *.log
+.env
+.env.*
+!.env.example
 pip-wheel-metadata/
 scratch/
 config/*.yaml.local
