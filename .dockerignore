@@ -9,3 +9,9 @@ dist
 .coverage
 pytest.xml
 *.log
+.pytest_cache
+.ruff_cache
+.uv-cache
+*.sqlite
+output.json
+config/accounts.yaml
