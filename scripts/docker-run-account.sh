@@ -84,6 +84,20 @@ load_dotenv() {
   done < "$file"
 }
 
+is_truthy() {
+  case "${1,,}" in
+    1|true|yes|on) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_builtin_network() {
+  case "$1" in
+    ''|bridge|host|none) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -95,12 +109,16 @@ Options:
       --image IMAGE     Docker image to run (default: bot2904/imap-readonly-mcp).
       --build           Build the image before running.
       --no-build        Skip the automatic build for the default image.
+      --network NAME    Connect to Docker network NAME (default: pi2904network).
+      --publish         Publish the MCP port to the host. Off by default.
       --dry-run         Print the docker command instead of executing it.
   -h, --help            Show this help.
 
 Environment overrides:
   IMAGE                 Same as --image.
-  HOST_PORT             Host port to publish (default: FASTMCP_PORT, usually 8765).
+  DOCKER_NETWORK        Same as --network. Default network is auto-created.
+  PUBLISH_PORTS         true/1/yes/on to publish the MCP port to the host.
+  HOST_PORT             Host port when publishing (default: FASTMCP_PORT).
   CONTAINER_NAME        Container name (default: imap-readonly-mcp-ACCOUNT_KEY).
   FASTMCP_PORT          Container port (default: 8765).
   FASTMCP_HOST          Container bind host (default: 0.0.0.0).
@@ -110,6 +128,8 @@ Environment overrides:
 
 Examples:
   scripts/docker-run-account.sh --env-dir ../mail-secrets fastmail
+  scripts/docker-run-account.sh --network mcp --env-dir ../mail-secrets fastmail
+  scripts/docker-run-account.sh --publish --env-dir ../mail-secrets fastmail
   scripts/docker-run-account.sh --env-file ../mail-secrets/.env fastmail -d
   IMAGE=bot2904/imap-readonly-mcp:latest \
     scripts/docker-run-account.sh --no-build --env-dir ../mail-secrets fastmail
@@ -134,9 +154,12 @@ EOF
 
 ENV_FILE="${MAIL_ENV_FILE:-}"
 DEFAULT_IMAGE="bot2904/imap-readonly-mcp"
+DEFAULT_NETWORK="pi2904network"
 IMAGE_VALUE="${IMAGE:-$DEFAULT_IMAGE}"
 BUILD_IMAGE="auto"
 DRY_RUN="false"
+DOCKER_NETWORK_OPTION=""
+PUBLISH_PORTS_OPTION=""
 ACCOUNT_KEY=""
 
 while [[ $# -gt 0 ]]; do
@@ -162,6 +185,15 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-build)
       BUILD_IMAGE="false"
+      shift
+      ;;
+    --network)
+      [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
+      DOCKER_NETWORK_OPTION="$2"
+      shift 2
+      ;;
+    --publish)
+      PUBLISH_PORTS_OPTION="true"
       shift
       ;;
     --dry-run)
@@ -310,8 +342,20 @@ while IFS= read -r name; do
   add_pass_env "$name"
 done < <(compgen -A variable FASTMCP_ | sort)
 
+DOCKER_NETWORK_VALUE="${DOCKER_NETWORK_OPTION:-${DOCKER_NETWORK:-$DEFAULT_NETWORK}}"
+PUBLISH_PORTS_VALUE="${PUBLISH_PORTS_OPTION:-${PUBLISH_PORTS:-false}}"
 HOST_PORT_VALUE="${HOST_PORT:-$FASTMCP_PORT}"
 CONTAINER_NAME_VALUE="${CONTAINER_NAME:-imap-readonly-mcp-${ACCOUNT_KEY}}"
+
+declare -a NETWORK_ARGS=()
+if [[ -n "$DOCKER_NETWORK_VALUE" ]]; then
+  NETWORK_ARGS+=(--network "$DOCKER_NETWORK_VALUE")
+fi
+
+declare -a PORT_ARGS=(--expose "$FASTMCP_PORT")
+if is_truthy "$PUBLISH_PORTS_VALUE"; then
+  PORT_ARGS+=(-p "${HOST_PORT_VALUE}:${FASTMCP_PORT}")
+fi
 
 declare -a ENV_ARGS=()
 while IFS= read -r name; do
@@ -337,10 +381,19 @@ if [[ "$BUILD_IMAGE" == "true" ]]; then
   fi
 fi
 
+if [[ -n "$DOCKER_NETWORK_VALUE" ]] && ! is_builtin_network "$DOCKER_NETWORK_VALUE"; then
+  if [[ "$DRY_RUN" == "true" ]]; then
+    printf '+ docker network inspect %q >/dev/null 2>&1 || docker network create %q >/dev/null\n' "$DOCKER_NETWORK_VALUE" "$DOCKER_NETWORK_VALUE"
+  else
+    docker network inspect "$DOCKER_NETWORK_VALUE" >/dev/null 2>&1 || docker network create "$DOCKER_NETWORK_VALUE" >/dev/null
+  fi
+fi
+
 COMMAND=(
   docker run --rm
   --name "$CONTAINER_NAME_VALUE"
-  -p "${HOST_PORT_VALUE}:${FASTMCP_PORT}"
+  "${NETWORK_ARGS[@]}"
+  "${PORT_ARGS[@]}"
   "${ENV_ARGS[@]}"
   "${DOCKER_RUN_ARGS[@]}"
   "$IMAGE_VALUE"
@@ -351,7 +404,13 @@ COMMAND=(
 printf '[imap-readonly-mcp] env:     %s\n' "$ENV_FILE"
 printf '[imap-readonly-mcp] account: %s (%d mapped vars)\n' "$ACCOUNT_KEY" "${#SELECTED_ENV_NAMES[@]}"
 printf '[imap-readonly-mcp] image:   %s\n' "$IMAGE_VALUE"
-printf '[imap-readonly-mcp] url:     http://localhost:%s%s\n' "$HOST_PORT_VALUE" "$FASTMCP_STREAMABLE_HTTP__PATH"
+printf '[imap-readonly-mcp] network: %s\n' "${DOCKER_NETWORK_VALUE:-default}"
+if is_truthy "$PUBLISH_PORTS_VALUE"; then
+  printf '[imap-readonly-mcp] url:     http://localhost:%s%s\n' "$HOST_PORT_VALUE" "$FASTMCP_STREAMABLE_HTTP__PATH"
+else
+  printf '[imap-readonly-mcp] access:  same Docker network only; no host port published\n'
+  printf '[imap-readonly-mcp] url:     http://%s:%s%s\n' "$CONTAINER_NAME_VALUE" "$FASTMCP_PORT" "$FASTMCP_STREAMABLE_HTTP__PATH"
+fi
 
 if [[ "$DRY_RUN" == "true" ]]; then
   printf '+ '
