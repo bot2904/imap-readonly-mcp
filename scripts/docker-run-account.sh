@@ -84,11 +84,21 @@ load_dotenv() {
   done < "$file"
 }
 
+declare -A EXPLICIT_MAIL_ACCOUNT_OVERRIDES=()
+while IFS= read -r name; do
+  EXPLICIT_MAIL_ACCOUNT_OVERRIDES["$name"]="${!name}"
+done < <(compgen -A variable MAIL_ACCOUNT__ | sort)
+
 is_truthy() {
-  case "${1,,}" in
-    1|true|yes|on) return 0 ;;
+  case "$1" in
+    1|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]|[Oo][Nn]) return 0 ;;
     *) return 1 ;;
   esac
+}
+
+var_is_set() {
+  local name="$1"
+  eval "[[ \${$name+x} ]]"
 }
 
 is_builtin_network() {
@@ -125,6 +135,8 @@ Environment overrides:
   FASTMCP_STREAMABLE_HTTP__PATH  MCP path (default: /mcp).
   FASTMCP_LOG_LEVEL     Log level (default: INFO).
   MAIL_CACHE_PATH       Cache path inside container (default: /tmp/email_cache.sqlite).
+  MAIL_ACCOUNT__*       Override selected account variables after ACCOUNT_KEY mapping,
+                        for example MAIL_ACCOUNT__ALLOWED_FOLDERS='["INBOX"]'.
 
 Examples:
   scripts/docker-run-account.sh --env-dir ../mail-secrets fastmail
@@ -273,12 +285,23 @@ load_dotenv "$ENV_FILE"
 
 ACCOUNT_PREFIX="MAIL_ACCOUNT_${ACCOUNT_KEY}__"
 declare -a SELECTED_ENV_NAMES=()
-declare -A PASS_ENV=()
+declare -a PASS_ENV_NAMES=()
+
+append_unique_pass_env_name() {
+  local name="$1"
+  local existing
+
+  for existing in "${PASS_ENV_NAMES[@]+"${PASS_ENV_NAMES[@]}"}"; do
+    [[ "$existing" == "$name" ]] && return 0
+  done
+
+  PASS_ENV_NAMES+=("$name")
+}
 
 add_pass_env() {
   local name="$1"
   export "$name"
-  PASS_ENV["$name"]=1
+  append_unique_pass_env_name "$name"
 }
 
 while IFS= read -r source_name; do
@@ -288,6 +311,15 @@ while IFS= read -r source_name; do
   SELECTED_ENV_NAMES+=("$target_name")
   add_pass_env "$target_name"
 done < <(compgen -A variable "$ACCOUNT_PREFIX" | sort)
+
+# Let wrapper scripts override the mapped account values with explicit
+# MAIL_ACCOUNT__* environment variables, e.g.:
+#   MAIL_ACCOUNT__ALLOWED_FOLDERS='["INBOX","Archive"]' \
+#     scripts/docker-run-account.sh --env-dir ../mail-secrets fastmail
+for target_name in "${!EXPLICIT_MAIL_ACCOUNT_OVERRIDES[@]}"; do
+  printf -v "$target_name" '%s' "${EXPLICIT_MAIL_ACCOUNT_OVERRIDES[$target_name]}"
+  add_pass_env "$target_name"
+done
 
 if [[ ${#SELECTED_ENV_NAMES[@]} -eq 0 ]]; then
   cat >&2 <<EOF
@@ -332,7 +364,7 @@ done
 
 # Optional top-level server settings if present in the loaded .env/environment.
 for name in MAIL_FETCH_CONCURRENCY MAIL_DEFAULT_SEARCH_LIMIT MAIL_MAXIMUM_SEARCH_LIMIT MAIL_CONNECTION_RETRIES; do
-  if [[ -v "$name" ]]; then
+  if var_is_set "$name"; then
     add_pass_env "$name"
   fi
 done
@@ -360,7 +392,7 @@ fi
 declare -a ENV_ARGS=()
 while IFS= read -r name; do
   ENV_ARGS+=(--env "$name")
-done < <(printf '%s\n' "${!PASS_ENV[@]}" | sort)
+done < <(printf '%s\n' "${PASS_ENV_NAMES[@]}" | sort)
 
 if [[ "$BUILD_IMAGE" == "auto" ]]; then
   if [[ "$IMAGE_VALUE" == "$DEFAULT_IMAGE" ]]; then
@@ -392,10 +424,10 @@ fi
 COMMAND=(
   docker run --rm
   --name "$CONTAINER_NAME_VALUE"
-  "${NETWORK_ARGS[@]}"
-  "${PORT_ARGS[@]}"
-  "${ENV_ARGS[@]}"
-  "${DOCKER_RUN_ARGS[@]}"
+  "${NETWORK_ARGS[@]+"${NETWORK_ARGS[@]}"}"
+  "${PORT_ARGS[@]+"${PORT_ARGS[@]}"}"
+  "${ENV_ARGS[@]+"${ENV_ARGS[@]}"}"
+  "${DOCKER_RUN_ARGS[@]+"${DOCKER_RUN_ARGS[@]}"}"
   "$IMAGE_VALUE"
   --config /dev/null
   --transport "$FASTMCP_TRANSPORT"
