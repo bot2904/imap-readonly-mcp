@@ -6,6 +6,7 @@ import argparse
 import base64
 import binascii
 import json
+import logging
 import os
 import re
 from collections.abc import Mapping, Sequence
@@ -82,6 +83,11 @@ def create_server(settings: MailSettings) -> FastMCP:
     else:
         log_level = requested_log_level
     debug = os.environ.get("FASTMCP_DEBUG", "false").lower() in ("1", "true", "yes", "on")
+    logging.basicConfig(
+        level=getattr(logging, log_level),
+        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+    )
+    logging.getLogger("imap_readonly_mcp").setLevel(getattr(logging, log_level))
 
     mcp = FastMCP(
         "imap-readonly-mail",

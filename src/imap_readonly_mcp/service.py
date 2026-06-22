@@ -34,6 +34,13 @@ from .utils.identifiers import decode_folder_token
 logger = logging.getLogger(__name__)
 
 
+def _format_log_extra(extra: dict[str, object]) -> str:
+    parts = [f"{key}={value!r}" for key, value in extra.items() if value is not None]
+    if not parts:
+        return ""
+    return " " + " ".join(parts)
+
+
 class FolderAccessPolicy:
     """Central, exact-match folder access policy for a configured account."""
 
@@ -73,8 +80,8 @@ class FolderAccessPolicy:
         attachment_id: int | str | None = None,
         reason: str = "folder denied by policy",
     ) -> None:
-        logger.info(
-            "Denied mail access: protocol=%s operation=%s folder=%r uid=%r attachment_id=%r reason=%s",
+        logger.warning(
+            "mail_access_denied protocol=%s operation=%s folder=%r uid=%r attachment_id=%r reason=%r",
             self.protocol.value,
             operation,
             folder_path,
@@ -122,7 +129,9 @@ class MailService:
 
     def list_folders(self) -> list[FolderInfo]:
         connector = self._get_connector()
-        return self._folder_policy.filter_folders(connector.list_folders())
+        folders = self._folder_policy.filter_folders(connector.list_folders())
+        self._log_mail_access("list_folders", result_count=len(folders))
+        return folders
 
     def search_messages(self, filters: MessageSearchFilters) -> list[MessageSummary]:
         normalized_filters = self._normalize_filters(filters)
@@ -132,16 +141,32 @@ class MailService:
         if not self._folder_policy.is_allowed(normalized_filters.folder):
             self._folder_policy.log_denied(normalized_filters.folder, operation="search_messages")
             return []
+        self._log_mail_access(
+            "search_messages",
+            folder_path=normalized_filters.folder,
+            limit=normalized_filters.limit,
+            offset=normalized_filters.offset,
+            unread_only=normalized_filters.unread_only,
+            text_query=bool(normalized_filters.text),
+        )
         connector = self._get_connector()
-        return self._filter_summaries(
+        summaries = self._filter_summaries(
             connector.search_messages(normalized_filters),
             operation="search_messages_result",
         )
+        self._log_mail_access(
+            "search_messages_result",
+            folder_path=normalized_filters.folder,
+            result_count=len(summaries),
+        )
+        return summaries
 
     def fetch_message(self, folder_token: str, uid: str) -> MessageDetail:
         folder_path = self._decode_and_assert_folder(folder_token, operation="fetch_message", uid=uid)
+        self._log_mail_access("fetch_message", folder_path=folder_path, uid=uid)
         cached = self._get_cached_allowed(folder_token, uid, folder_path)
         if cached:
+            self._log_mail_access("fetch_message_cache_hit", folder_path=folder_path, uid=uid)
             return cached
         detail = self._fetch_message_uncached(folder_token, uid, folder_path=folder_path)
         self._cache.set(folder_token, uid, detail)
@@ -149,6 +174,7 @@ class MailService:
 
     def fetch_raw_message(self, folder_token: str, uid: str) -> bytes:
         folder_path = self._decode_and_assert_folder(folder_token, operation="fetch_raw_message", uid=uid)
+        self._log_mail_access("fetch_raw_message", folder_path=folder_path, uid=uid)
         connector = self._get_connector()
         return connector.fetch_raw_message(folder_path, uid)
 
@@ -164,6 +190,12 @@ class MailService:
             uid=uid,
             attachment_id=attachment_identifier,
             exc_type=AttachmentNotFoundError,
+        )
+        self._log_mail_access(
+            "fetch_attachment",
+            folder_path=folder_path,
+            uid=uid,
+            attachment_id=attachment_identifier,
         )
         connector = self._get_connector()
         return connector.fetch_attachment(folder_path, uid, attachment_identifier)
@@ -187,6 +219,13 @@ class MailService:
                 results[resource_uri] = cached
             else:
                 missing.append((resource_uri, folder_token, uid))
+
+        self._log_mail_access(
+            "fetch_details_bulk",
+            requested_count=len(requests),
+            cache_hit_count=len(results),
+            fetch_count=len(missing),
+        )
 
         if not missing:
             return results
@@ -213,7 +252,34 @@ class MailService:
             raise ConnectorNotAvailableError(f"No connector registered for protocol {account.protocol.value}")
         connector = IMAPReadOnlyConnector(account)
         self._connector = connector
+        logger.info(
+            "mail_connector_initialized protocol=%s host=%r port=%r ssl=%s starttls=%s",
+            account.protocol.value,
+            account.host,
+            account.port,
+            account.security.use_ssl,
+            account.security.starttls,
+        )
         return connector
+
+    def _log_mail_access(
+        self,
+        operation: str,
+        *,
+        folder_path: str | None = None,
+        uid: str | None = None,
+        attachment_id: int | str | None = None,
+        **extra: object,
+    ) -> None:
+        logger.info(
+            "mail_access protocol=%s operation=%s folder=%r uid=%r attachment_id=%r%s",
+            self.settings.account.protocol.value,
+            operation,
+            folder_path,
+            uid,
+            attachment_id,
+            _format_log_extra(extra),
+        )
 
     def _normalize_filters(self, filters: MessageSearchFilters) -> MessageSearchFilters:
         limit = filters.limit or self.settings.default_search_limit
@@ -268,6 +334,7 @@ class MailService:
             if not self._folder_policy.is_allowed(inbox):
                 self._folder_policy.log_denied(inbox, operation="search_all_folders")
                 return []
+            self._log_mail_access("search_all_folders", folder_path=inbox, limit=filters.limit)
             return self._filter_summaries(
                 connector.search_messages(filters.model_copy(update={"folder": inbox})),
                 operation="search_all_folders_result",
@@ -279,6 +346,12 @@ class MailService:
 
         all_mail_folder = self._find_all_mail_folder(folder_infos)
         if all_mail_folder:
+            self._log_mail_access(
+                "search_all_folders_selected_all_mail",
+                folder_path=all_mail_folder,
+                limit=filters.limit,
+                offset=filters.offset,
+            )
             return self._filter_summaries(
                 connector.search_messages(
                     filters.model_copy(update={"folder": all_mail_folder, "offset": filters.offset})
@@ -302,6 +375,11 @@ class MailService:
             if remaining_budget <= 0:
                 break
             per_folder_limit = min(remaining_budget, self.settings.maximum_search_limit)
+            self._log_mail_access(
+                "search_all_folders_folder",
+                folder_path=folder_path,
+                limit=per_folder_limit,
+            )
             adjusted_filters = filters.model_copy(
                 update={
                     "folder": folder_path,
