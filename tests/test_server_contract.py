@@ -1,10 +1,8 @@
 from __future__ import annotations
-import pytest
-from pydantic import Field
-from typing import Annotated, Literal
-from mcp.server.fastmcp import FastMCP
-from imap_readonly_mcp.server import create_server
+
 from imap_readonly_mcp.config import MailSettings
+from imap_readonly_mcp.server import create_server
+
 
 def test_mail_fetch_signature_defaults():
     """
@@ -35,4 +33,5 @@ def test_mail_fetch_signature_defaults():
     # Check other parameters mentioned in the code while we're at it
     assert sig.parameters["query"].default == ""
     assert sig.parameters["folder"].default == ""
+    assert sig.parameters["unread_only"].default is False
     assert sig.parameters["limit"].default == 0

@@ -39,13 +39,20 @@ class MailFetchInput(BaseModel):
                 {
                     "folder": "INBOX",
                     "limit": 25,
-                    "include": "headers",
+                    "include": "metadata",
                     "include_attachments": "none",
                 },
                 {
-                    "query": "from:billing@example.com newer_than:7d",
+                    "query": "invoice",
+                    "since": "2025-05-01",
                     "include": "full",
                     "include_attachments": "meta",
+                },
+                {
+                    "folder": "INBOX",
+                    "unread_only": True,
+                    "include": "text",
+                    "limit": 50,
                 },
                 {
                     "ids": ["mail://SU5CT1g=/12345"],
@@ -61,8 +68,12 @@ class MailFetchInput(BaseModel):
         description="If provided, fetch exactly these message identifiers (use the `id` field from prior calls).",
     )
     query: str | None = _nullable_string_field(
-        description="Free-text IMAP mail query. Leave empty to list the most recent messages.",
-        examples=["from:billing@example.com newer_than:7d"],
+        description=(
+            "Plain full-text search matched by IMAP TEXT (typically subject, headers, and body). "
+            "Leave empty to list the most recent messages. This is not Gmail-style syntax; use "
+            "since/until for dates and unread_only for unread messages."
+        ),
+        examples=["invoice", "meeting notes"],
     )
     folder: str | None = _nullable_string_field(
         description="Folder/mailbox name (e.g. 'INBOX') or encoded token returned previously. Defaults to the configured inbox.",
@@ -75,6 +86,10 @@ class MailFetchInput(BaseModel):
     until: str | None = _nullable_string_field(
         description='Upper bound timestamp (ISO-8601 or natural language such as "yesterday").',
         examples=["2025-05-31T23:59:00Z", "yesterday"],
+    )
+    unread_only: bool = Field(
+        default=False,
+        description="When true, return only messages that are not marked as read/seen on the IMAP server.",
     )
     limit: int | None = Field(
         default=None,
@@ -238,8 +253,8 @@ class MailMessageItem(BaseModel):
         default=None,
         description="True when the message has at least one attachment.",
     )
-    body_text: str | None = Field(default=None, description="Plain text body (when include='full').")
-    body_html: str | None = Field(default=None, description="HTML body (when include='full').")
+    body_text: str | None = Field(default=None, description="Plain text body (when include='text' or include='full').")
+    body_html: str | None = Field(default=None, description="HTML body (when include='html' or include='full').")
     headers: dict[str, list[str]] | None = Field(
         default=None,
         description="Complete header mapping when include='full'.",

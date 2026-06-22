@@ -179,6 +179,7 @@ def create_server(settings: MailSettings) -> FastMCP:
             "folder",
             "since",
             "until",
+            "unread_only",
             "limit",
             "include",
             "expand_thread",
@@ -428,14 +429,16 @@ def create_server(settings: MailSettings) -> FastMCP:
             "List, search, or read messages from the mailbox with controllable body detail and attachment metadata.\n"
             "Parameters:\n"
             "- `ids`: array of message ids to fetch directly (skips search/paging).\n"
-            "- `query`: free-text IMAP query (e.g. `from:billing@example.com newer_than:7d`).\n"
+            "- `query`: plain full-text IMAP TEXT search (not Gmail-style operators).\n"
             "- `folder`: human name or encoded token; omit to search all folders via heuristics.\n"
             '- `since`/`until`: ISO or natural-language bounds ("2025-05-01", "last monday").\n'
+            "- `unread_only`: true to return only messages not marked read/seen.\n"
             "- `limit`: page size (defaults to server limit, typically 50).\n"
             "- `cursor`: opaque string from `next_cursor` or `sync_cursor` to resume.\n"
             "- `include`: `metadata`, `text`, `html`, or `full` to control body payload.\n"
             "- `expand_thread`: true to pull the rest of any matching threads (best effort).\n"
             "- `include_attachments`: `none`, `meta`, or `inline` for attachment detail.\n"
+            "Read-only guarantee: searches/fetches do not set read/seen flags.\n"
             "Note: this tool omits keys whose values are null or empty ([], {})."
         ),
         structured_output=True,
@@ -446,7 +449,7 @@ def create_server(settings: MailSettings) -> FastMCP:
             Field(
                 description="Exact message ids to fetch (leave empty to search).",
             ),
-        ] = [],
+        ] = [],  # noqa: B006 - FastMCP exposes this default in the generated tool schema.
         query: Annotated[
             str,
             Field(
@@ -475,6 +478,13 @@ def create_server(settings: MailSettings) -> FastMCP:
                 description='Upper bound time (ISO-8601 or natural language like "yesterday").',
             ),
         ] = "",
+        unread_only: Annotated[
+            bool,
+            Field(
+                default=False,
+                description="Return only messages that are not marked read/seen.",
+            ),
+        ] = False,
         limit: Annotated[
             int,
             Field(
@@ -513,6 +523,7 @@ def create_server(settings: MailSettings) -> FastMCP:
             folder=(folder or None),
             since=(since or None),
             until=(until or None),
+            unread_only=unread_only,
             limit=(None if not limit else limit),
             cursor=(cursor or None),
             include=include,
@@ -610,7 +621,7 @@ def create_server(settings: MailSettings) -> FastMCP:
             recipient=None,
             since=effective.get("since"),
             until=effective.get("until"),
-            unread_only=False,
+            unread_only=bool(effective.get("unread_only")),
             has_attachments=None,
             limit=limit_value,
             time_frame=None,

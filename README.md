@@ -177,7 +177,7 @@ To disable caching, set `cache_path` to `/dev/null` (Unix) or another throwaway 
 
 | Tool               | Description                                                          | Key Inputs |
 |--------------------|----------------------------------------------------------------------|------------|
-| `mail_fetch`        | List / search / read messages with controllable detail (see below). | `query`, `folder`, `include`, `cursor`, etc. |
+| `mail_fetch`        | List / search / read messages with controllable detail (see below). | `query`, `folder`, `unread_only`, `include`, `cursor`, etc. |
 | `mail_download_attachment` | Download a single attachment (Base64).                    | `message_id`, `attachment_id` |
 
 ### `mail_fetch` Include Modes
@@ -190,6 +190,13 @@ To disable caching, set `cache_path` to `/dev/null` (Unix) or another throwaway 
 - `full` – includes text + HTML + raw headers.
 
 Attachments follow `include_attachments` (`none`, `meta`, `inline`), and thread expansion (`expand_thread`) stays best-effort.
+
+### `mail_fetch` Search Semantics
+
+- `query` is plain IMAP `TEXT` full-text search, typically matching subject, headers, and body.
+- `query` is **not** Gmail-style syntax: do not use operators like `from:` or `newer_than:`.
+- Use `since`/`until` for date bounds and `unread_only: true` for unread/UNSEEN messages.
+- All operations are read-only and do not mark messages as read.
 
 ### Response Consistency
 
