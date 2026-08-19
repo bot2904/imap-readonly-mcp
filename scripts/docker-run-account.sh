@@ -369,7 +369,7 @@ for name in MAIL_FETCH_CONCURRENCY MAIL_DEFAULT_SEARCH_LIMIT MAIL_MAXIMUM_SEARCH
   fi
 done
 
-# Preserve any other explicit FastMCP vars from the loaded .env/environment.
+# Preserve any other explicit MCPServer runtime vars using the legacy FASTMCP_ prefix.
 while IFS= read -r name; do
   add_pass_env "$name"
 done < <(compgen -A variable FASTMCP_ | sort)

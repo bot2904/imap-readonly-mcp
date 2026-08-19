@@ -26,8 +26,7 @@ dependencies = [
   "anyio>=4.3",
   "charset-normalizer>=3.3",
   "dateparser>=1.2",
-  # FastMCP was removed from the mcp package in version 2.
-  "mcp>=0.1.5,<2",
+  "mcp>=2,<3",
   "pydantic>=2.8",
   "pydantic-settings>=2.4",
   "PyYAML>=6.0",

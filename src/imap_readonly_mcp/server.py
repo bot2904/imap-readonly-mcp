@@ -12,14 +12,14 @@ import re
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated, Any, Literal, cast
+from typing import Annotated, Any, Literal
 
 import anyio
 from charset_normalizer import from_bytes
-from mcp.server.fastmcp import FastMCP
-from mcp.server.fastmcp.utilities.logging import get_logger
+from mcp.server import MCPServer
 from pydantic import Field
 
+from . import __version__
 from .config import MailSettings, load_settings
 from .exceptions import AttachmentNotFoundError, MessageNotFoundError
 from .models import AttachmentContent, MessageSearchFilters
@@ -37,7 +37,7 @@ from .tooling import (
 from .utils.email_parser import _html_to_text
 from .utils.identifiers import decode_folder_token
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 _MISSING = object()
@@ -55,17 +55,10 @@ def _attachment_metadata_value(metadata: Any, key: str, default: Any = None) -> 
     return default
 
 
-def create_server(settings: MailSettings) -> FastMCP:
-    """Create a configured FastMCP application instance."""
+def create_server(settings: MailSettings) -> MCPServer:
+    """Create a configured MCP server instance."""
 
     service = MailService(settings)
-    host = os.environ.get("FASTMCP_HOST", "127.0.0.1")
-    port = _coerce_int(os.environ.get("FASTMCP_PORT"), default=8000)
-    sse_path = os.environ.get("FASTMCP_SSE_PATH", "/sse")
-    message_path = os.environ.get("FASTMCP_MESSAGE_PATH", "/messages/")
-    streamable_path = os.environ.get("FASTMCP_STREAMABLE_HTTP__PATH", "/mcp")
-    mount_path = os.environ.get("FASTMCP_MOUNT_PATH", "/")
-
     requested_log_level = os.environ.get("FASTMCP_LOG_LEVEL", "INFO").upper()
     allowed_log_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
     if requested_log_level == "TRACE":
@@ -89,14 +82,9 @@ def create_server(settings: MailSettings) -> FastMCP:
     )
     logging.getLogger("imap_readonly_mcp").setLevel(getattr(logging, log_level))
 
-    mcp = FastMCP(
+    mcp = MCPServer(
         "imap-readonly-mail",
-        host=host,
-        port=port,
-        sse_path=sse_path,
-        message_path=message_path,
-        streamable_http_path=streamable_path,
-        mount_path=mount_path,
+        version=__version__,
         log_level=log_level,  # type: ignore[arg-type]
         debug=debug,
     )
@@ -455,7 +443,7 @@ def create_server(settings: MailSettings) -> FastMCP:
             Field(
                 description="Exact message ids to fetch (leave empty to search).",
             ),
-        ] = [],  # noqa: B006 - FastMCP exposes this default in the generated tool schema.
+        ] = [],  # noqa: B006 - MCPServer exposes this default in the generated tool schema.
         query: Annotated[
             str,
             Field(
@@ -1031,27 +1019,39 @@ def main(argv: Sequence[str] | None = None) -> None:
     if transport not in TRANSPORT_CHOICES:
         raise ValueError(f"Unsupported transport '{transport}'. Expected one of {TRANSPORT_CHOICES}.")
 
+    host = os.environ.get("FASTMCP_HOST", "127.0.0.1")
+    port = _coerce_int(os.environ.get("FASTMCP_PORT"), default=8000)
+    sse_path = os.environ.get("FASTMCP_SSE_PATH", "/sse")
+    message_path = os.environ.get("FASTMCP_MESSAGE_PATH", "/messages/")
+    streamable_path = os.environ.get("FASTMCP_STREAMABLE_HTTP__PATH", "/mcp")
+
     if transport == "streamable-http":
         print(
             f"[imap-readonly-mcp] Starting StreamableHTTP server on "
-            f"{server.settings.host}:{server.settings.port} (path={server.settings.streamable_http_path})",
+            f"{host}:{port} (path={streamable_path})",
             flush=True,
+        )
+        server.run(
+            transport="streamable-http",
+            host=host,
+            port=port,
+            streamable_http_path=streamable_path,
         )
     elif transport == "sse":
         print(
-            f"[imap-readonly-mcp] Starting SSE server on {server.settings.host}:{server.settings.port} "
-            f"(path={server.settings.sse_path})",
+            f"[imap-readonly-mcp] Starting SSE server on {host}:{port} (path={sse_path})",
             flush=True,
+        )
+        server.run(
+            transport="sse",
+            host=host,
+            port=port,
+            sse_path=sse_path,
+            message_path=message_path,
         )
     else:
         print("[imap-readonly-mcp] Starting stdio transport", flush=True)
-
-    mount_path = None
-    if transport == "sse":
-        mount_path = os.environ.get("FASTMCP_SSE_MOUNT_PATH", server.settings.mount_path)
-
-    transport_lit = cast(Literal["stdio", "sse", "streamable-http"], transport)
-    server.run(transport=transport_lit, mount_path=mount_path)
+        server.run(transport="stdio")
 
 
 def _coerce_int(value: str | None, default: int) -> int:

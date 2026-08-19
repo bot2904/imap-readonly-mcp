@@ -159,7 +159,7 @@ export MAIL_FETCH_CONCURRENCY=6
 | `MAIL_CACHE_PATH`      | Alternate cache location if not set in YAML.            |
 | `MAIL_FETCH_CONCURRENCY` | Override concurrency (same effect as YAML).          |
 | `MAIL_ACCOUNT__HOST` / `MAIL_ACCOUNT__USERNAME` / etc. | Configure or override account fields. |
-| `FASTMCP_*`            | Standard FastMCP options (transport, ports, auth, logging). |
+| `FASTMCP_*`            | MCPServer runtime options (transport, host, port, paths, and logging). |
 
 ---
 
@@ -235,7 +235,7 @@ src/imap_readonly_mcp/
   ├── config.py          # settings & loader
   ├── connectors/        # IMAP connector implementation
   ├── service.py         # caching, parallel fetch orchestration
-  ├── server.py          # FastMCP entrypoint & tool wiring
+  ├── server.py          # MCPServer entrypoint & tool wiring
   ├── tooling.py         # Pydantic models for tool IO
   └── utils/             # parsers, identifier helpers, etc.
 ```

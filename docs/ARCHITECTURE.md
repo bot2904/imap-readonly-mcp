@@ -6,7 +6,7 @@ This document summarises the AI-generated design.
 
 - **Connector**: The IMAP implementation inherits `ReadOnlyMailConnector` and guarantees read-only operations.
 - **Service Layer**: `MailService` enforces limits, decodes folder tokens, applies exact case-insensitive folder allow/deny policy, validates cache entries, and routes requests to the IMAP connector.
-- **Server Entry Point**: `server.py` wires FastMCP tools/resources, routes blocking calls through threads, and exposes CLI options.
+- **Server Entry Point**: `server.py` wires MCPServer tools/resources, routes blocking calls through threads, and exposes CLI options.
 
 ## Data Flow
 

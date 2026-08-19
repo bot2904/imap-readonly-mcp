@@ -16,8 +16,8 @@ def test_project_urls_point_to_real_repository():
     }
 
 
-def test_mcp_dependency_excludes_incompatible_major_version():
+def test_mcp_dependency_uses_current_major_version():
     pyproject_path = Path(__file__).resolve().parents[1] / "pyproject.toml"
     pyproject = tomllib.loads(pyproject_path.read_text())
 
-    assert "mcp>=0.1.5,<2" in pyproject["project"]["dependencies"]
+    assert "mcp>=2,<3" in pyproject["project"]["dependencies"]
