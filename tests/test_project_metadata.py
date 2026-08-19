@@ -14,3 +14,10 @@ def test_project_urls_point_to_real_repository():
         "Documentation": "https://github.com/AzizMarashly/imap-readonly-mcp#readme",
         "Issues": "https://github.com/AzizMarashly/imap-readonly-mcp/issues",
     }
+
+
+def test_mcp_dependency_excludes_incompatible_major_version():
+    pyproject_path = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    pyproject = tomllib.loads(pyproject_path.read_text())
+
+    assert "mcp>=0.1.5,<2" in pyproject["project"]["dependencies"]
