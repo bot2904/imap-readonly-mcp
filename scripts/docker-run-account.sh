@@ -121,6 +121,8 @@ Options:
       --no-build        Skip the automatic build for the default image.
       --network NAME    Connect to Docker network NAME (default: pi2904network).
       --publish         Publish the MCP port to the host. Off by default.
+      --bindLocal PORT  Publish to 127.0.0.1:PORT only, keeping the Docker network.
+                        Takes precedence over --publish and PUBLISH_PORTS.
       --dry-run         Print the docker command instead of executing it.
   -h, --help            Show this help.
 
@@ -142,6 +144,7 @@ Examples:
   scripts/docker-run-account.sh --env-dir ../mail-secrets fastmail
   scripts/docker-run-account.sh --network mcp --env-dir ../mail-secrets fastmail
   scripts/docker-run-account.sh --publish --env-dir ../mail-secrets fastmail
+  scripts/docker-run-account.sh --bindLocal 9876 --env-dir ../mail-secrets fastmail
   scripts/docker-run-account.sh --env-file ../mail-secrets/.env fastmail -d
   IMAGE=bot2904/imap-readonly-mcp:latest \
     scripts/docker-run-account.sh --no-build --env-dir ../mail-secrets fastmail
@@ -172,6 +175,7 @@ BUILD_IMAGE="auto"
 DRY_RUN="false"
 DOCKER_NETWORK_OPTION=""
 PUBLISH_PORTS_OPTION=""
+BIND_LOCAL_PORT=""
 ACCOUNT_KEY=""
 
 while [[ $# -gt 0 ]]; do
@@ -207,6 +211,15 @@ while [[ $# -gt 0 ]]; do
     --publish)
       PUBLISH_PORTS_OPTION="true"
       shift
+      ;;
+    --bindLocal)
+      [[ $# -ge 2 ]] || { echo "Missing port for $1" >&2; exit 2; }
+      if [[ ! "$2" =~ ^[0-9]{1,5}$ ]] || (( 10#$2 < 1 || 10#$2 > 65535 )); then
+        echo "Invalid port for $1: $2 (expected 1–65535)" >&2
+        exit 2
+      fi
+      BIND_LOCAL_PORT="$((10#$2))"
+      shift 2
       ;;
     --dry-run)
       DRY_RUN="true"
@@ -385,7 +398,9 @@ if [[ -n "$DOCKER_NETWORK_VALUE" ]]; then
 fi
 
 declare -a PORT_ARGS=(--expose "$FASTMCP_PORT")
-if is_truthy "$PUBLISH_PORTS_VALUE"; then
+if [[ -n "$BIND_LOCAL_PORT" ]]; then
+  PORT_ARGS+=(-p "127.0.0.1:${BIND_LOCAL_PORT}:${FASTMCP_PORT}")
+elif is_truthy "$PUBLISH_PORTS_VALUE"; then
   PORT_ARGS+=(-p "${HOST_PORT_VALUE}:${FASTMCP_PORT}")
 fi
 
@@ -437,7 +452,9 @@ printf '[imap-readonly-mcp] env:     %s\n' "$ENV_FILE"
 printf '[imap-readonly-mcp] account: %s (%d mapped vars)\n' "$ACCOUNT_KEY" "${#SELECTED_ENV_NAMES[@]}"
 printf '[imap-readonly-mcp] image:   %s\n' "$IMAGE_VALUE"
 printf '[imap-readonly-mcp] network: %s\n' "${DOCKER_NETWORK_VALUE:-default}"
-if is_truthy "$PUBLISH_PORTS_VALUE"; then
+if [[ -n "$BIND_LOCAL_PORT" ]]; then
+  printf '[imap-readonly-mcp] url:     http://127.0.0.1:%s%s\n' "$BIND_LOCAL_PORT" "$FASTMCP_STREAMABLE_HTTP__PATH"
+elif is_truthy "$PUBLISH_PORTS_VALUE"; then
   printf '[imap-readonly-mcp] url:     http://localhost:%s%s\n' "$HOST_PORT_VALUE" "$FASTMCP_STREAMABLE_HTTP__PATH"
 else
   printf '[imap-readonly-mcp] access:  same Docker network only; no host port published\n'

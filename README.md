@@ -42,6 +42,14 @@ docker run --rm \
 
 > The image entrypoint already includes Python and the project, so the final argument list just provides flags. The cache path defaults to `/tmp/email_cache.sqlite`, which is always writable inside the container; mount a host directory and point `MAIL_CACHE_PATH` there if you want persistence.
 
+To run an account from a keyed `.env` file and also connect from the Docker host:
+
+```bash
+scripts/docker-run-account.sh --bindLocal 9876 --env-file /path/to/.env fastmail
+```
+
+The server remains reachable on the configured Docker network (`pi2904network` by default). `--bindLocal` also makes it reachable at `http://127.0.0.1:9876/mcp`, without binding to other host interfaces.
+
 ### Streamable HTTP
 
 ```bash
